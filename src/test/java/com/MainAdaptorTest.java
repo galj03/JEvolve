@@ -8,6 +8,7 @@ import com.matching.fgpdg.nodes.Guards;
 import com.utils.FileIO;
 import org.inferrules.Utils;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.python.antlr.ast.FunctionDef;
 import org.python.antlr.ast.Import;
@@ -20,69 +21,43 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static org.inferrules.Utils.*;
+import static org.inferrules.Utils.getPathToResources;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MainAdaptorTest {
+    @BeforeEach
+    public void setUp(){
+        Configurations.PROJECT_REPOSITORY = "/Users/malinda/Documents/ArtifactEvaluation_FSE2024/donotshare/PyEvolve/src/test/resources/";
+        Configurations.TYPE_REPOSITORY = "/Users/malinda/Documents/ArtifactEvaluation_FSE2024/donotshare/TYPE_REPO/";
+    }
     @Test
     void transplantPatternToFile1() {
         String projectFile = "author/project/test26.py";
         String LHS = getPathToResources("author/project/pattern12.py") ;
-        String RHS = getPathToResources("author/project/r_pattern12.py");
-        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS);
+        String RHS =  getPathToResources("author/project/r_pattern12.py");
+        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS, false);
         Assertions.assertEquals("import numpy as np\n" +
                 "\n" +
                 "def function1(sentence,callbacks):\n" +
                 "    ff = {\"one\":1,\"two\":2}\n" +
                 "    print(ff)\n" +
                 "    z = np.sum(ff.values())\n" +
-                "    return z\n" +
-                "#Test\n" +
-                "#Test again\n" +
-                "def function2(sentence,callbacks):\n" +
+                "    return z",s);
+    }
+
+    @Test
+    void transplantPatternTestMicrosoft() {
+        String projectFile = "author/project/detrex_modeling_backbone_torchvision_resnet.py";
+        String LHS = getPathToResources("author/project/lp24.py") ;
+        String RHS =  getPathToResources("author/project/rp24.py");
+        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS, false);
+        Assertions.assertEquals("import numpy as np\n" +
+                "\n" +
+                "def scfunction1(sentence,callbacks):\n" +
                 "    ff = {\"one\":1,\"two\":2}\n" +
                 "    print(ff)\n" +
                 "    z = np.sum(ff.values())\n" +
-                "    return z\n" +
-                "#Somecomment\n" +
-                "\n" +
-                "def function1(sentence,callbacks):\n" +
-                "    ff = {\"one\":1,\"two\":2}\n" +
-                "    z=0\n" +
-                "    print(ff)\n" +
-                "    return z\n" +
-                "\n" +
-                "\n" +
-                "def function3(sentence,callbacks):\n" +
-                "    ff = {\"one\":1,\"two\":2}\n" +
-                "    print(ff)\n" +
-                "    z = np.sum(ff.values())\n" +
-                "    return z\n" +
-                "\n" +
-                "# Done\n"+"def function4(sentence,callbacks):\n" +
-                "    ff = {\"one\":1,\"two\":2}\n" +
-                "    print(ff)\n" +
-                "    z = np.sum(ff.values())\n" +
-                "    print(z)\n" +
-                "    return z\n" +
-                "\n" +
-                "\n" +
-                "# Done\n"+
-                "def function5(sentence,callbacks):\n" +
-                "      z = np.sum(ff.values())\n" +
-                "      print(z)\n" +
-                "      return z\n" +
-                "\n" +
-                "\n" +
-                "\n" +
-                "# Done\n" +
-                "def function6(sentence,callbacks):\n" +
-                "      print(\"cc\")\n" +
-                "      print(\"bb\")\n" +
-                "      for v in ff.values():\n" +
-                "        print(bb)\n" +
-                "        z = np.sum(ff.values())\n" +
-                "        print(z)\n" +
-                "      return z",s);
+                "    return z",s);
     }
 
     @Test
@@ -90,7 +65,7 @@ class MainAdaptorTest {
         String projectFile = "dipy/dipy/dipy/reconst/forecast.py";
         String LHS = getPathToResources("author/project/pattern17.py");
         String RHS = getPathToResources("author/project/r_pattern17.py");
-        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS);
+        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS, false);
         Assertions.assertEquals(" ",s);
     }
 
@@ -119,7 +94,7 @@ class MainAdaptorTest {
         String projectFile = "LxMLS/lxmls-toolkit/lxmls/classifiers/mira.py";
         String LHS = getPathToResources("author/project/p_l_npsum.py") ;
         String RHS = getPathToResources("author/project/p_r_npsum.py");
-        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS);
+        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS, false);
         System.out.println();
 
 
@@ -130,7 +105,7 @@ class MainAdaptorTest {
         String projectFile = "LxMLS/lxmls-toolkit/lxmls/classifiers/perceptron.py";
         String LHS = getPathToResources("author/project/p_l_npsum.py") ;
         String RHS = getPathToResources("author/project/p_r_npsum.py");
-        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS);
+        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS, false);
         System.out.println();
     }
 
@@ -140,7 +115,7 @@ class MainAdaptorTest {
         String projectFile = "microsoft/nni/examples/trials/benchmarking/automlbenchmark/nni/extensions/NNI/architectures/run_mlp.py";
         String LHS = getPathToResources("author/project/p_l_mean.py") ;
         String RHS = getPathToResources("author/project/p_r_mean.py");
-        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS);
+        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS, false);
         System.out.println();
     }
 
@@ -149,7 +124,7 @@ class MainAdaptorTest {
         String projectFile = "microsoft/nni/examples/trials/benchmarking/automlbenchmark/nni/extensions/NNI/architectures/run_random_forest.py";
         String LHS = getPathToResources("author/project/p_l_mean.py") ;
         String RHS = getPathToResources("author/project/p_r_mean.py");
-        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS);
+        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS, false);
         System.out.println();
     }
     @Test
@@ -157,7 +132,7 @@ class MainAdaptorTest {
         String projectFile = "idaholab/raven/ravenframework/SupervisedLearning/MSR.py";
         String LHS = getPathToResources("author/project/p_l_npsum2.py") ;
         String RHS = getPathToResources("author/project/p_r_npsum.py");
-        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS);
+        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS, false);
         System.out.println();
     }
 
@@ -166,7 +141,7 @@ class MainAdaptorTest {
         String projectFile = "keras-team/keras/keras/utils/layer_utils_test.py";
         String LHS = getPathToResources("author/project/l_join.py") ;
         String RHS = getPathToResources("author/project/r_join.py");
-        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS);
+        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS, false);
         System.out.println();
     }
 
@@ -175,7 +150,7 @@ class MainAdaptorTest {
         String projectFile = "keras-team/keras/keras/utils/layer_utils_test.py";
         String LHS = getPathToResources("author/project/l_with.py") ;
         String RHS = getPathToResources("author/project/r_with.py");
-        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS);
+        String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS, false);
         System.out.println();
     }
 

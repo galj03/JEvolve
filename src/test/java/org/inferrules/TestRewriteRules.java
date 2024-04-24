@@ -21,7 +21,34 @@ public class TestRewriteRules {
         assertTrue(areAlphaEquivalent(expectedReplace,rw.getReplace().getTemplate()));
     }
 
+    @Test
+    void test_example_deepspeed(){
+        String before = "for key, value in json_config.items():\n" +
+                "\tself.__dict__[key] = value";
+        String after = "self.__dict__.update(json_config)";
+        RewriteRule rw = new RewriteRule(before, after,  Language.Python);
+        System.out.println(rw.getMatch().getTemplate());
+        System.out.println(rw.getReplace().getTemplate());
+    }
 
+    @Test
+    void test_example_stanleylsx(){
+        String before = "new_value = [old_value[i]+value[i] for i in range(len(value))]";
+        String after = "new_value = np.add(old_value,value).tolist()";
+        RewriteRule rw = new RewriteRule(before, after,  Language.Python);
+        System.out.println(rw.getMatch().getTemplate());
+        System.out.println(rw.getReplace().getTemplate());
+    }
+
+    @Test
+    void test_example_idea(){
+        String before = "for name, x in xs.items():\n" +
+                "       out[name] = x";
+        String after = "out.update(xs)";
+        RewriteRule rw = new RewriteRule(before, after,  Language.Python);
+        System.out.println(rw.getMatch().getTemplate());
+        System.out.println(rw.getReplace().getTemplate());
+    }
 
     @Test
     void testJavaRewriteRule2() {

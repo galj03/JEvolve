@@ -4,6 +4,8 @@ import com.adaptrule.AdaptRule;
 import com.adaptrule.Rule;
 import com.inferrules.comby.jsonResponse.CombyRewrite;
 import com.inferrules.comby.operations.BasicCombyOperations;
+import com.inferrules.core.RewriteRule;
+import com.inferrules.core.languageAdapters.Language;
 import com.matching.fgpdg.*;
 import com.matching.fgpdg.nodes.Guards;
 import com.matching.fgpdg.nodes.TypeInfo.TypeWrapper;
@@ -25,25 +27,89 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.utils.Utils.getPathToResources;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@picocli.CommandLine.Command(
+        name = "pycraft",
+        mixinStandardHelpOptions = true,  // Adds --help and --version
+        description = "Application that mordanize ode bases"
+)
 public class MainAdaptor {
     public static void main(String[] args) {
         System.out.println("In main");
-        var input = parseCommandLineArgs(args);
-        List<File> patterns = FileIO.readAllFiles(".py", input.get("Patterns"));
-        System.out.println(patterns);
-        Configurations.PROJECT_REPOSITORY = input.get("ProjectRepos");
-        Configurations.TYPE_REPOSITORY = input.get("Types");
-        String[] files = FileIO.readFile(input.get("ProjectFiles")).split("\n");
-        System.out.println(Arrays.toString(files));
-        for (File l_ : patterns.stream().filter(t -> t.getName().startsWith("l_")).collect(Collectors.toList())) {
-            System.out.println("File ++++++++"+l_);
-            File r_ = new File(l_.getParentFile()+ "/r_"+ l_.getName().substring(2));
-            for (String refactoringFile : files) {
-                MainAdaptor.transplantPatternToFile(refactoringFile, l_.getPath(), r_.getPath());
+//        var input = parseCommandLineArgs(args);
+//        List<File> patterns = FileIO.readAllFiles(".py", input.get("Patterns"));
+//        System.out.println(patterns);
+//        Configurations.PROJECT_REPOSITORY = input.get("ProjectRepos");
+//        Configurations.TYPE_REPOSITORY = input.get("Types");
+//        String[] files = FileIO.readFile(input.get("ProjectFiles")).split("\n");
+//        System.out.println(Arrays.toString(files));
+//        for (File l_ : patterns.stream().filter(t -> t.getName().startsWith("l_")).collect(Collectors.toList())) {
+//            System.out.println("File ++++++++"+l_);
+//            File r_ = new File(l_.getParentFile()+ "/r_"+ l_.getName().substring(2));
+//            for (String refactoringFile : files) {
+//                MainAdaptor.transplantPatternToFile(refactoringFile, l_.getPath(), r_.getPath(), true);
+//            }
+//        }
+        picocli.CommandLine c = new picocli.CommandLine(new MainAdaptor());
+        c.addSubcommand("infer", new RuleInferenceMaker());
+        c.addSubcommand("transform", new CodeTransformer());
+        c.execute(args);
+    }
+
+    @picocli.CommandLine.Command(name = "infer", description = "Infer transformation rules for a given set of patterns")
+    static class RuleInferenceMaker implements Runnable{
+        @picocli.CommandLine.Option(names = {"-p", "--patterns"}, description = "Path for the pattern repository", required = true)
+        private String patterns;
+        @picocli.CommandLine.Option(names = {"-r", "--rules"}, description = "Output path for the transformation rule repository", required = true)
+        private String rules;
+        @Override
+        public void run() {
+            MainAdaptor.inferTransformationRules(patterns,rules);
+        }
+    }
+
+    @picocli.CommandLine.Command(name = "transform", description = "Apply transformations defied in the rules to code bases")
+    static class CodeTransformer implements Runnable{
+        @picocli.CommandLine.Option(names  = {"-r","--repositories"}, description = "Path for project repository",required = true)
+        String projectRepo;
+        @picocli.CommandLine.Option(names = {"-t","--types"},description = "Path for type repository", required = true)
+        String typeRepo;
+        @picocli.CommandLine.Option(names = {"-f","--files"},description = "The text file contains the file paths of Python files that need to be refactored.", required = true)
+        String fileToBeTransformed;
+        @picocli.CommandLine.Option(names ={"-p","patterns"},description = "Path for code patterns",required = true)
+        String patternRepo;
+        @Override
+        public void run() {
+            List<File> patterns = FileIO.readAllFiles(".py", patternRepo);
+            System.out.println(patterns);
+            Configurations.PROJECT_REPOSITORY = projectRepo;
+            Configurations.TYPE_REPOSITORY = typeRepo;
+            String[] files = FileIO.readFile(fileToBeTransformed).split("\n");
+            System.out.println(Arrays.toString(files));
+            for (File l_ : patterns.stream().filter(t -> t.getName().startsWith("l_")).collect(Collectors.toList())) {
+                System.out.println("File ++++++++"+l_);
+                File r_ = new File(l_.getParentFile()+ "/r_"+ l_.getName().substring(2));
+                for (String refactoringFile : files) {
+                    System.out.println("Processing project file  "+refactoringFile);
+                    MainAdaptor.transplantPatternToFile(refactoringFile, l_.getPath(), r_.getPath(), true);
+                }
             }
         }
-            }
+    }
+
+    public static void inferTransformationRules(String codeChanges,String outPutRepo){
+        List<File> codeChangeExamples = FileIO.readAllFiles(".py", codeChanges);
+        for (File l_ : codeChangeExamples.stream().filter(t -> t.getName().startsWith("l_")).collect(Collectors.toList())) {
+            System.out.println("File ++++++++"+l_);
+            File r_ = new File(l_.getParentFile()+ "/r_"+ l_.getName().substring(2));
+            RewriteRule rw = new RewriteRule(FileIO.readStringFromFile(l_.getAbsolutePath()),
+                    FileIO.readStringFromFile(r_.getAbsolutePath()),  Language.Python);
+            FileIO.writeStringToFile(rw.getMatch().getTemplate(),outPutRepo + "/"+l_.getName());
+            FileIO.writeStringToFile(rw.getReplace().getTemplate(),outPutRepo + "/"+r_.getName());
+
+        }
+    }
 
     public static List<MatchedNode> getMatchedNodes(String filename, String lpatternname, FunctionDef func, List<stmt> importStmt, Module lpatternModule) {
         List<MatchedNode> graphs = new ArrayList<>();
@@ -152,7 +218,7 @@ public class MainAdaptor {
         return finalPatterns;
     }
 
-    public static String transplantPatternToFile(String filename, String LHS, String RHS) {
+    public static String transplantPatternToFile(String filename, String LHS, String RHS, boolean replaceFile) {
         BasicCombyOperations op = new BasicCombyOperations();
         Module codeModule = Utils.getPythonModule(Configurations.PROJECT_REPOSITORY + filename);
         String sourceCode = FileIO.readFile(Configurations.PROJECT_REPOSITORY + filename);
@@ -185,8 +251,10 @@ public class MainAdaptor {
                 }
             }
         }
-        adaptedFile.append(sourceCode, previousStop, sourceCode.length() - 1);
-        FileIO.writeStringToFile(adaptedFile.toString(),Configurations.PROJECT_REPOSITORY +filename);
+        if (previousStop<sourceCode.length() - 1)
+            adaptedFile.append(sourceCode, previousStop, sourceCode.length() - 1);
+        if (replaceFile)
+            FileIO.writeStringToFile(adaptedFile.toString(),Configurations.PROJECT_REPOSITORY +filename);
 
         return adaptedFile.toString();
     }

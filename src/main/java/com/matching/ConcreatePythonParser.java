@@ -698,6 +698,12 @@ public class ConcreatePythonParser  {
         }
 
         @Override
+        public Object visitTuple(Tuple node) throws Exception{
+            updateParent(node);
+            return super.visitTuple(node);
+        }
+
+        @Override
         public Object visitList(List node) throws Exception {
             updateParent(node);
             return super.visitList(node);

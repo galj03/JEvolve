@@ -1063,7 +1063,7 @@ public class PDGGraph implements Serializable {
                                     context.getTypeWrapper().getTypeInfo(astNode.getInternalTargets().get(0).getLine(),
                                             astNode.getInternalTargets().get(0).getCharPositionInLine(), ((Name) astNode.getInternalTargets().get(0)).getInternalId()));
 
-                } else if (!info[1].equals(context.getTypeWrapper().getTypeInfo(astNode.getInternalTargets().get(0).getLine(),
+                } else if (info[1]!=null && !info[1].equals(context.getTypeWrapper().getTypeInfo(astNode.getInternalTargets().get(0).getLine(),
                         astNode.getInternalTargets().get(0).getCharPositionInLine(), ((Name) astNode.getInternalTargets().get(0)).getInternalId()))) {
                     context.updateTypeOfVariable(((Name) astNode.getInternalTargets().get(0)).getInternalId(),
                             context.getTypeWrapper().getTypeInfo(astNode.getInternalTargets().get(0).getLine(),
