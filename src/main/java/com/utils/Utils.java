@@ -1,5 +1,6 @@
 package com.utils;
 
+import com.LanguageConfigurations;
 import com.matching.ConcreatePythonParser;
 import com.matching.fgpdg.*;
 import com.matching.fgpdg.nodes.Guards;
@@ -24,7 +25,6 @@ import java.util.List;
 import java.util.*;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class Utils {
     private static int thresholdForIterations = 10;
@@ -357,20 +357,20 @@ public class Utils {
         return maxPDGNode;
     }
 
-    public static ArrayList<File> getPythonFiles(File[] files) {
-        ArrayList<File> pythonFiles = new ArrayList<>();
+    public static ArrayList<File> getCodeFiles(File[] files) {
+        ArrayList<File> codeFiles = new ArrayList<>();
         for (File file : files) {
             if (file.isDirectory()) {
                 if (!file.getName().startsWith(".")) {
-                    pythonFiles.addAll(getPythonFiles(Objects.requireNonNull(file.listFiles()))); // Calls same method again.
+                    codeFiles.addAll(getCodeFiles(Objects.requireNonNull(file.listFiles()))); // Calls same method again.
                 }
             } else {
-                if (file.getName().endsWith(".py")) {
-                    pythonFiles.add(file);
+                if (file.getName().endsWith(LanguageConfigurations.EXTENSION)) {
+                    codeFiles.add(file);
                 }
             }
         }
-        return pythonFiles;
+        return codeFiles;
     }
 
     public static String getPathToResources(String name){
@@ -405,7 +405,7 @@ public class Utils {
         }
         ConcreatePythonParser parser = new ConcreatePythonParser();
         Module patternModule = parser.parseTemplates(pattern);
-        ArrayList<File> files =  getPythonFiles(Objects.requireNonNull(dir.listFiles()));
+        ArrayList<File> files =  getCodeFiles(Objects.requireNonNull(dir.listFiles()));
         Guards guards = new Guards(pattern,patternModule);
         TypeWrapper wrapper = new TypeWrapper(guards);
         PDGBuildingContext patternContext = new PDGBuildingContext(patternModule.getInternalBody().stream().filter(x -> x instanceof Import

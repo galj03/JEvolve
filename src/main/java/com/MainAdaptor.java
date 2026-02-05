@@ -81,7 +81,7 @@ public class MainAdaptor {
         String patternRepo;
         @Override
         public void run() {
-            List<File> patterns = FileIO.readAllFiles(".py", patternRepo);
+            List<File> patterns = FileIO.readAllFiles(LanguageConfigurations.EXTENSION, patternRepo);
             System.out.println(patterns);
             Configurations.PROJECT_REPOSITORY = projectRepo;
             Configurations.TYPE_REPOSITORY = typeRepo;
@@ -98,13 +98,14 @@ public class MainAdaptor {
         }
     }
 
+    // TODO: input data to "l_name" and "r_name"!!!
     public static void inferTransformationRules(String codeChanges,String outPutRepo){
-        List<File> codeChangeExamples = FileIO.readAllFiles(".py", codeChanges);
+        List<File> codeChangeExamples = FileIO.readAllFiles(LanguageConfigurations.EXTENSION, codeChanges);
         for (File l_ : codeChangeExamples.stream().filter(t -> t.getName().startsWith("l_")).collect(Collectors.toList())) {
             System.out.println("File ++++++++"+l_);
             File r_ = new File(l_.getParentFile()+ "/r_"+ l_.getName().substring(2));
             RewriteRule rw = new RewriteRule(FileIO.readStringFromFile(l_.getAbsolutePath()),
-                    FileIO.readStringFromFile(r_.getAbsolutePath()),  Language.Python);
+                    FileIO.readStringFromFile(r_.getAbsolutePath()),  LanguageConfigurations.LANGUAGE);
             FileIO.writeStringToFile(rw.getMatch().getTemplate(),outPutRepo + "/"+l_.getName());
             FileIO.writeStringToFile(rw.getReplace().getTemplate(),outPutRepo + "/"+r_.getName());
 

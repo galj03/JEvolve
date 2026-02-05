@@ -1,5 +1,6 @@
 package com.utils;
 
+import com.LanguageConfigurations;
 import io.vavr.control.Try;
 
 import java.io.*;
@@ -40,7 +41,7 @@ public class FileIO {
     public static List<File> readAllFiles(String extension, String path){
         File folder = new File(path);
         if (folder.exists()){
-            return Arrays.stream(Objects.requireNonNull(folder.listFiles())).filter(x->x.getName().endsWith(".py")).collect(Collectors.toList());
+            return Arrays.stream(Objects.requireNonNull(folder.listFiles())).filter(x->x.getName().endsWith(LanguageConfigurations.EXTENSION)).collect(Collectors.toList());
         }
         return new ArrayList<>();
     }
