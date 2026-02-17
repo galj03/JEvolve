@@ -43,7 +43,7 @@ public class PDGGraph implements Serializable {
     public PDGGraph(FunctionDef md, PDGBuildingContext context) {
         this.context = context;
         context.addScope();
-        this.context.setMethod(md);
+        this.context.setMethod(md, false);
         int numOfParameters = 0;
         parameters = new PDGDataNode[md.getInternalArgs().getInternalArgs().size()];
 
