@@ -28,8 +28,7 @@ public class PDGBuildingContext {
     private Stack<HashSet<PDGActionNode>> stkTrys = new Stack<>();
     private HashMap<String, String> importsMap = new HashMap<>();
 
-    //???
-//    protected boolean interprocedural;
+    protected boolean interprocedural = false;
 
     public HashMap<String, String> getImportsMap() {
         return importsMap;
