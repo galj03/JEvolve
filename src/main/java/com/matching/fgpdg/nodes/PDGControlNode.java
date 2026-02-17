@@ -3,29 +3,29 @@ package com.matching.fgpdg.nodes;
 
 import com.matching.fgpdg.PDGGraph;
 
-import org.python.core.PyObject;
+import org.eclipse.jdt.core.dom.ASTNode;
 
 public class PDGControlNode extends PDGNode {
 
-    public PDGControlNode(PDGNode control, String branch, PyObject astNode, int nodeType) {
+    public PDGControlNode(PDGNode control, String branch, ASTNode astNode, int nodeType) {
         super(astNode, nodeType);
         this.control = control;
         new PDGControlEdge(control, this, branch);
     }
 
-    public PDGControlNode(PyObject astNode,int nodeType,PDGNode control){
+    public PDGControlNode(ASTNode astNode,int nodeType,PDGNode control){
         super(astNode, nodeType);
         this.control = control;
     }
 
     @Override
     public String getLabel() {
-        return PyObject.nodeClassForASTName(astNodeType);
+        return ASTNode.nodeClassForType(astNodeType).getSimpleName();
     }
 
     @Override
     public String getExasLabel() {
-        return PyObject.nodeClassForASTName(astNodeType);
+        return ASTNode.nodeClassForType(astNodeType).getSimpleName();
     }
 
     @Override

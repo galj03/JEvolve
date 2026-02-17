@@ -1,9 +1,9 @@
 package com.matching.fgpdg.nodes;
 
-import org.python.core.PyObject;
+import org.eclipse.jdt.core.dom.ASTNode;
 
 public class PDGLazyHole extends PDGHoleNode {
-    public PDGLazyHole(PyObject astNode, int nodeType, String value, String key, String dataType, String dataName,boolean isDataNode,boolean isActionNode,boolean isContralNode) {
+    public PDGLazyHole(ASTNode astNode, int nodeType, String value, String key, String dataType, String dataName, boolean isDataNode, boolean isActionNode, boolean isContralNode) {
         super(astNode, nodeType, value, key, dataType, dataName, isDataNode, isActionNode, isContralNode);
     }
 

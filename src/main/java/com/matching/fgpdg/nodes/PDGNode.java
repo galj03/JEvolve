@@ -1,35 +1,36 @@
 package com.matching.fgpdg.nodes;
 
 import com.utils.Assertions;
-import org.python.antlr.base.expr;
-import org.python.core.PyObject;
+import org.eclipse.jdt.core.dom.ASTNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import com.utils.JavaASTUtil;
+
 
 public abstract class PDGNode {
     public static final String PREFIX_DUMMY = "dummy_";
-    private HashMap<Object,Object> propertyMap = new HashMap<>();
-    protected PyObject astNode;
+    private HashMap<Object, Object> propertyMap = new HashMap<>();
+    protected ASTNode astNode;
     protected int astNodeType;
     protected String key;
     protected PDGNode control;
     protected String dataType;
-    protected ArrayList<PDGEdge> inEdges = new ArrayList<PDGEdge>();
-    protected ArrayList<PDGEdge> outEdges = new ArrayList<PDGEdge>();
+    protected ArrayList<PDGEdge> inEdges = new ArrayList<>();
+    protected ArrayList<PDGEdge> outEdges = new ArrayList<>();
     private static int nodeNumber = 0;
     private int id;
 
 
-    public void setProperty(Object property,Object object){
-        this.propertyMap.put(property,object);
+    public void setProperty(Object property, Object object) {
+        this.propertyMap.put(property, object);
     }
 
 
-    public Object getProperty(Object property){
+    public Object getProperty(Object property) {
         return this.propertyMap.get(property);
     }
 
@@ -47,19 +48,19 @@ public abstract class PDGNode {
 
 
     public void setId(int nid) {
-         this.id =nid;
+        this.id = nid;
     }
 
     public int version;
 
-    public PDGNode(PyObject astNode, int nodeType) {
+    public PDGNode(ASTNode astNode, int nodeType) {
         this.astNode = astNode;
         this.astNodeType = nodeType;
-        this.id=nodeNumber;
+        this.id = nodeNumber;
         nodeNumber++;
     }
 
-    public PDGNode(PyObject astNode, int nodeType, String key) {
+    public PDGNode(ASTNode astNode, int nodeType, String key) {
         this(astNode, nodeType);
         this.key = key;
     }
@@ -80,7 +81,7 @@ public abstract class PDGNode {
         if (this instanceof PDGDataNode)
             return ((PDGDataNode) this).getDataName();
         else if (this instanceof PDGHoleNode) {
-            return ((PDGHoleNode)this).getDataName();
+            return ((PDGHoleNode) this).getDataName();
 
         }
 
@@ -103,7 +104,7 @@ public abstract class PDGNode {
         return astNodeType;
     }
 
-    public PyObject getAstNode() {
+    public ASTNode getAstNode() {
         return astNode;
     }
 
@@ -123,21 +124,21 @@ public abstract class PDGNode {
         inEdges.add(edge);
     }
 
-    public boolean isLiteral(expr node) {
-        Assertions.UNREACHABLE();
-        isLiteral(node.getNodeType());
-        return true;
-    }
-
-    public boolean isLiteral(int nodeType) {
-        if (nodeType == PyObject.NUM ||
-                nodeType == PyObject.STR)
-            return true;
-        return false;
-    }
+//    public boolean isLiteral(expr node) {
+//        Assertions.UNREACHABLE();
+//        isLiteral(node.getNodeType());
+//        return true;
+//    }
+//
+//    public boolean isLiteral(int nodeType) {
+//        if (nodeType == PyObject.NUM ||
+//                nodeType == PyObject.STR)
+//            return true;
+//        return false;
+//    }
 
     public boolean isLiteral() {
-        return isLiteral(astNodeType);
+        return JavaASTUtil.isLiteral(astNodeType);
     }
 
     public void delete() {
@@ -335,38 +336,40 @@ public abstract class PDGNode {
         return true;
     }
 
-    public HashSet<PDGNode> getAllChildNodes(int depth,List<PDGNode> avoidCodeNode){
-        if (depth==0){
-            HashSet<PDGNode> inNodeList= new HashSet<>();
+    public HashSet<PDGNode> getAllChildNodes(int depth, List<PDGNode> avoidCodeNode) {
+        if (depth == 0) {
+            HashSet<PDGNode> inNodeList = new HashSet<>();
             inNodeList.add(this);
             return inNodeList;
         }
         depth--;
-        HashSet<PDGNode> inNodeList= new HashSet<>();
+        HashSet<PDGNode> inNodeList = new HashSet<>();
         inNodeList.add(this);
         int finalDepth1 = depth;
-        inEdges.stream().map(PDGEdge::getSource).filter(y->!avoidCodeNode.contains(y)).forEach(z->{
+        inEdges.stream().map(PDGEdge::getSource).filter(y -> !avoidCodeNode.contains(y)).forEach(z -> {
             avoidCodeNode.add(this);
-            inNodeList.addAll(z.getAllChildNodes(finalDepth1,avoidCodeNode));
+            inNodeList.addAll(z.getAllChildNodes(finalDepth1, avoidCodeNode));
         });
-        outEdges.stream().map(PDGEdge::getTarget).filter(y->!avoidCodeNode.contains(y)).forEach(z->{
+        outEdges.stream().map(PDGEdge::getTarget).filter(y -> !avoidCodeNode.contains(y)).forEach(z -> {
             avoidCodeNode.add(this);
-            inNodeList.addAll(z.getAllChildNodes(finalDepth1,avoidCodeNode));
+            inNodeList.addAll(z.getAllChildNodes(finalDepth1, avoidCodeNode));
         });
         return inNodeList;
     }
 
-    public HashSet<PDGNode> getAllChildNodes(int depth){
-        if (depth==0){return  new HashSet<>();}
+    public HashSet<PDGNode> getAllChildNodes(int depth) {
+        if (depth == 0) {
+            return new HashSet<>();
+        }
         depth--;
-        HashSet<PDGNode> inNodeList= new HashSet<>();
+        HashSet<PDGNode> inNodeList = new HashSet<>();
         inNodeList.add(this);
         int finalDepth = depth;
-        inEdges.forEach(x->inNodeList.addAll(x.getSource().getAllChildNodes(finalDepth)));
-        outEdges.forEach(x->inNodeList.addAll(x.getTarget().getAllChildNodes(finalDepth)));
+        inEdges.forEach(x -> inNodeList.addAll(x.getSource().getAllChildNodes(finalDepth)));
+        outEdges.forEach(x -> inNodeList.addAll(x.getTarget().getAllChildNodes(finalDepth)));
         return inNodeList;
     }
 
-    public abstract boolean  isEqualNodes(PDGNode node);
+    public abstract boolean isEqualNodes(PDGNode node);
 
 }

@@ -1,11 +1,11 @@
 package com.matching.fgpdg.nodes;
 
-import org.python.core.PyObject;
+import org.eclipse.jdt.core.dom.ASTNode;
 
 public class PDGEntryNode extends PDGNode {
     private String label;
 
-    public PDGEntryNode(PyObject astNode, int nodeType, String label) {
+    public PDGEntryNode(ASTNode astNode, int nodeType, String label) {
         super(astNode, nodeType);
         this.label = label;
     }

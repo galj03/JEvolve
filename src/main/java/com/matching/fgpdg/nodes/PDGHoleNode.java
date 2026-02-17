@@ -1,35 +1,36 @@
 package com.matching.fgpdg.nodes;
 
-import org.python.core.PyObject;
+import org.eclipse.jdt.core.dom.ASTNode;
 
-public class PDGHoleNode  extends PDGNode {
-    PyObject parentClass;
+public class PDGHoleNode extends PDGNode {
+    ASTNode parentClass;
     protected String dataName;
     protected String value;
-    private boolean actionNode=false;
-    private boolean dataNode=false;
-    private boolean controlNode=false;
+    private boolean actionNode = false;
+    private boolean dataNode = false;
+    private boolean controlNode = false;
 
-    public PDGHoleNode(PyObject astNode, int nodeType) {
+    public PDGHoleNode(ASTNode astNode, int nodeType) {
         super(astNode, nodeType);
     }
 
-    public PDGHoleNode(PyObject astNode, int nodeType,String value, String key, String dataType1, String dataName,boolean isDataNode,boolean isActionNode,boolean isContralNode) {
+    public PDGHoleNode(ASTNode astNode, int nodeType, String value, String key, String dataType1, String dataName, boolean isDataNode, boolean isActionNode, boolean isContralNode) {
         super(astNode, nodeType, key);
         dataType = dataType1;
         this.dataName = dataName;
         this.value = value;
-        this.dataNode=isDataNode;
-        this.actionNode=isActionNode;
-        this.controlNode=isContralNode;
+        this.dataNode = isDataNode;
+        this.actionNode = isActionNode;
+        this.controlNode = isContralNode;
     }
-    public PDGHoleNode(PyObject astNode, int nodeType, String key) {
+
+    public PDGHoleNode(ASTNode astNode, int nodeType, String key) {
         super(astNode, nodeType, key);
     }
 
     @Override
     public String getLabel() {
-        return dataType+"("+dataName+")";
+        return dataType + "(" + dataName + ")";
     }
 
     @Override
@@ -68,14 +69,14 @@ public class PDGHoleNode  extends PDGNode {
     }
 
     public void copyData(PDGHoleNode node) {
-            this.astNode = node.astNode;
-            this.astNodeType = node.astNodeType;
-            this.dataName = node.dataName;
-            this.dataType = node.dataType;
-            this.key = node.key;
-            this.dataNode = node.dataNode;
-            this.controlNode = node.controlNode;
-            this.actionNode = node.actionNode;
+        this.astNode = node.astNode;
+        this.astNodeType = node.astNodeType;
+        this.dataName = node.dataName;
+        this.dataType = node.dataType;
+        this.key = node.key;
+        this.dataNode = node.dataNode;
+        this.controlNode = node.controlNode;
+        this.actionNode = node.actionNode;
     }
 
     public String getValue() {
@@ -84,6 +85,6 @@ public class PDGHoleNode  extends PDGNode {
 
     @Override
     public String toString() {
-        return "("+getId()+")"+getLabel();
+        return "(" + getId() + ")" + getLabel();
     }
 }

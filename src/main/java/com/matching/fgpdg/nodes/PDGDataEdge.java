@@ -25,7 +25,7 @@ public class PDGDataEdge extends PDGEdge {
             case REFERENCE: return "ref";
             case CONDITION: return "cond";
             case DEPENDENCE: return "dep";
-            case RE_DEFINITION: return "re_def";
+            case RE_DEFINITION: return "re_def"; //TODO: what is this? other func??
             case QUALIFIER: return "qual";
             case MAP: return "map";
             default: return "";

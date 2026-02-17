@@ -4,12 +4,14 @@ package com.matching.fgpdg.nodes;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import org.python.core.PyObject;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 public class PDGActionNode extends PDGNode {
     public static final String RECURSIVE = "recur";
     protected String name;
     protected String[] parameterTypes;
+//    protected ITypeBinding[] exceptionTypes;
 
     public String getName() {
         return name;
@@ -19,13 +21,13 @@ public class PDGActionNode extends PDGNode {
         this.name = name;
     }
 
-    public PDGActionNode(PyObject astNode, int nodeType, String key, String type, String name) {
+    public PDGActionNode(ASTNode astNode, int nodeType, String key, String type, String name) {
         super(astNode, nodeType, key);
         this.dataType = type;
         this.name = name;
     }
 
-    public PDGActionNode(PDGNode control, String branch, PyObject astNode, int nodeType, String key, String type, String name) {
+    public PDGActionNode(PDGNode control, String branch, ASTNode astNode, int nodeType, String key, String type, String name) {
         super(astNode, nodeType, key);
         if (control != null) {
             this.control = control;
