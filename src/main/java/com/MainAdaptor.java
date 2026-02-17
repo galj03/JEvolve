@@ -30,9 +30,9 @@ import static com.utils.Utils.getPathToResources;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @picocli.CommandLine.Command(
-        name = "pycraft",
+        name = "jevolve",
         mixinStandardHelpOptions = true,  // Adds --help and --version
-        description = "Application that mordanize ode bases"
+        description = "Application that modernize code bases"
 )
 public class MainAdaptor {
     public static void main(String[] args) {
