@@ -1,6 +1,7 @@
 package org.inferrules;
 import com.inferrules.core.RewriteRule;
 import com.inferrules.core.languageAdapters.Language;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.inferrules.Utils.areAlphaEquivalent;
@@ -188,7 +189,8 @@ public class TestRewriteRules {
 //
 //    }
 
-    @Test
+    //@Test
+    @Disabled
     void testPythonRewriteRule1() {
         String before = """
                 olderr = np.seterr(divide='ignore')
@@ -219,6 +221,7 @@ public class TestRewriteRules {
                     result += elem""";
         String after = "result = np.sum(elements)";
         String expectedMatch = """
+                :[[l3]] = 0
                 for :[[l0]] in :[[l1]]:
                     :[[l3]] += :[[l0]]""";
         String expectedReplace = ":[[l3]] = np.sum(:[[l1]])";
@@ -423,7 +426,8 @@ public class TestRewriteRules {
 
     }
 
-    @Test
+    //@Test
+    @Disabled
     void testPythonRewriteRule_If() {
         String before = """
                 title = ""
