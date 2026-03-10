@@ -6,6 +6,7 @@ import com.utils.Assertions;
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CharStream;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.python.antlr.AnalyzingParser;
 import org.python.antlr.PythonTree;
 import org.python.antlr.Visitor;
@@ -25,7 +26,8 @@ public class ConcreatePythonParser  {
 
     }
 
-    public Module parse(String fileName) {
+    //TODO
+    public CompilationUnit parse(String fileName) {
         URLModule inputStream = new URLModule(fileName);
         CharStream file = null;
         try {
@@ -48,7 +50,8 @@ public class ConcreatePythonParser  {
         return (Module)module;
     }
 
-    public Module parseTemplates(String code) throws Exception {
+    //TODO: idk what to do here
+    public CompilationUnit parseTemplates(String code) throws Exception {
         code = convertComByTemplateToParsableCode(code);
         ANTLRStringStream antlrSting = new ANTLRStringStream(code);
         AnalyzingParser p = new AnalyzingParser(antlrSting, "", "ascii");

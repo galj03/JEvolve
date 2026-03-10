@@ -10,6 +10,10 @@ import com.matching.fgpdg.nodes.PDGNode;
 import com.matching.fgpdg.nodes.TypeInfo.TypeWrapper;
 import io.vavr.control.Try;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.python.antlr.PythonTree;
 import org.python.antlr.Visitor;
 import org.python.antlr.ast.Module;
@@ -382,12 +386,12 @@ public class Utils {
 
     }
 
-    public static Module getPythonModule(String fileName){
+    public static CompilationUnit getPythonModule(String fileName){
         ConcreatePythonParser parser = new ConcreatePythonParser();
         return parser.parse(fileName);
     }
 
-    public static ArrayList<FunctionDef>  getAllFunctions(Module ast){
+    public static ArrayList<MethodDeclaration>  getAllFunctions(CompilationUnit ast){
         PyFuncDefVisitor fu = new PyFuncDefVisitor();
         try {
             fu.visit(ast);
@@ -480,7 +484,7 @@ public class Utils {
         }
     }
 
-    public static Try<Module> getPythonModuleForTemplate(String fileName) {
+    public static Try<CompilationUnit> getPythonModuleForTemplate(String fileName) {
         ConcreatePythonParser parser = new ConcreatePythonParser();
         return Try.of(()->parser.parseTemplates(FileIO.readStringFromFile(fileName)));
     }
@@ -580,20 +584,21 @@ static class Interval
         }
     }
 
-    static class PyFuncDefVisitor extends Visitor {
-        ArrayList<FunctionDef> funcDefs = new ArrayList<>();
+    static class PyFuncDefVisitor extends ASTVisitor {
+        ArrayList<MethodDeclaration> funcDefs = new ArrayList<>();
         @Override
-        public Object visitFunctionDef(FunctionDef node) throws Exception {
+        public boolean visit(MethodDeclaration node){
             funcDefs.add(node);
-            return super.visitFunctionDef (node);
+            return super.visit(node);
         }
+
         @Override
-        public void preVisit(PyObject node) {
+        public void preVisit(ASTNode node) {
 
         }
 
         @Override
-        public void postVisit(PyObject node) {
+        public void postVisit(ASTNode node) {
 
         }
     }

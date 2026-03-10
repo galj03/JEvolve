@@ -83,39 +83,39 @@ public class PDGGraph implements Serializable {
         return idPDG.get(id);
     }
 
-    //TODO: I don't think this is relevant in Java, but rethink it later
-//    public PDGGraph(Module md, PDGBuildingContext context) {
-//        this.context = context;
-//        context.addScope();
-//        entryNode = new PDGEntryNode(md, PyObject.MODULE, "START");
-//        nodes.add(entryNode);
-//        statementNodes.add(entryNode);
-//        for (stmt stmt : md.getInternalBody()) {
-//            if (stmt instanceof ImportFrom || stmt instanceof Import)
-//                continue;
-//            mergeSequential(Objects.requireNonNull(buildPDG(entryNode, "", stmt)));
-//        }
-//        adjustReturnNodes();
-//        adjustControlEdges();
-//        HashSet<PDGNode> toRemove = new HashSet<PDGNode>();
-//        for (PDGNode node : nodes) {
-//            if (node instanceof PDGEntryNode && node.getLabel().equals("START")) {
-//                for (PDGEdge edge : node.getOutEdges()) {
-//                    edge.getTarget().getInEdges().remove(edge);
-//                }
-//                toRemove.add(node);
-//            } else if (node instanceof PDGEntryNode && node.getLabel().equals("END")) {
-//                for (PDGEdge edge : node.getInEdges()) {
-//                    edge.getSource().getOutEdges().remove(edge);
-//                }
-//                toRemove.add(node);
-//            }
-//        }
-//        toRemove.forEach(x -> nodes.remove(x));
-//
-//        context.removeScope();
-//
-//    }
+    //TODO: get statements from CompilationUnit
+    public PDGGraph(CompilationUnit md, PDGBuildingContext context) {
+        this.context = context;
+        context.addScope();
+        entryNode = new PDGEntryNode(md, ASTNode.COMPILATION_UNIT, "START");
+        nodes.add(entryNode);
+        statementNodes.add(entryNode);
+        for (stmt stmt : md.getInternalBody()) {
+            if (stmt instanceof ImportFrom || stmt instanceof Import)
+                continue;
+            mergeSequential(Objects.requireNonNull(buildPDG(entryNode, "", stmt)));
+        }
+        adjustReturnNodes();
+        adjustControlEdges();
+        HashSet<PDGNode> toRemove = new HashSet<PDGNode>();
+        for (PDGNode node : nodes) {
+            if (node instanceof PDGEntryNode && node.getLabel().equals("START")) {
+                for (PDGEdge edge : node.getOutEdges()) {
+                    edge.getTarget().getInEdges().remove(edge);
+                }
+                toRemove.add(node);
+            } else if (node instanceof PDGEntryNode && node.getLabel().equals("END")) {
+                for (PDGEdge edge : node.getInEdges()) {
+                    edge.getSource().getOutEdges().remove(edge);
+                }
+                toRemove.add(node);
+            }
+        }
+        toRemove.forEach(x -> nodes.remove(x));
+
+        context.removeScope();
+
+    }
 
     public PDGGraph(PDGBuildingContext context, PDGNode node) {
         this(context);

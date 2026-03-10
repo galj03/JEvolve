@@ -13,6 +13,9 @@ import com.utils.FileIO;
 import com.utils.Utils;
 import io.vavr.control.Try;
 import org.apache.commons.cli.*;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.python.antlr.ast.Module;
 import org.python.antlr.ast.*;
 import org.python.antlr.base.stmt;
@@ -112,7 +115,7 @@ public class MainAdaptor {
         }
     }
 
-    public static List<MatchedNode> getMatchedNodes(String filename, String lpatternname, FunctionDef func, List<stmt> importStmt, Module lpatternModule) {
+    public static List<MatchedNode> getMatchedNodes(String filename, String lpatternname, MethodDeclaration func, List<ImportDeclaration> importStmt, CompilationUnit lpatternModule) {
         List<MatchedNode> graphs = new ArrayList<>();
         PDGBuildingContext fcontext = null;
         fcontext = Try.of(() -> new PDGBuildingContext(importStmt, filename)).onFailure(x -> System.err.println()).get();
@@ -121,13 +124,14 @@ public class MainAdaptor {
         Guards guards = new Guards(Try.of(() -> com.utils.Utils.getFileContent(getPathToResources(lpatternname)))
                 .onFailure(System.out::println).get(), lpatternModule);
         TypeWrapper wrapper = new TypeWrapper(guards);
-        PDGBuildingContext mcontext = new PDGBuildingContext(lpatternModule.getInternalBody().stream().filter(x -> x instanceof Import
-                || x instanceof ImportFrom).collect(Collectors.toList()), wrapper);
+//        PDGBuildingContext mcontext = new PDGBuildingContext(lpatternModule.getInternalBody().stream().filter(x -> x instanceof Import
+//                || x instanceof ImportFrom).collect(Collectors.toList()), wrapper);
+        PDGBuildingContext mcontext = new PDGBuildingContext((List<ImportDeclaration>)lpatternModule.imports(), wrapper);
         PDGGraph mpdg = new PDGGraph(lpatternModule, mcontext);
         MatchPDG match = new MatchPDG();
         graphs = match.getSubGraphs(mpdg, fpdg, mcontext, fcontext);
         graphs.forEach(x -> x.updateAllMatchedNodes(x, mpdg));
-        List<MatchedNode> finalPatterns = graphs.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
+        List<MatchedNode> finalPatterns = graphs.stream().filter(MatchedNode::isAllChildsMatched).toList();
 
         Try.of(() -> Files.createDirectories(Paths.get(new File("OUTPUT/matches/" + filename.
                 substring(0, filename.lastIndexOf('.')) + ".dot").getParent()))).onFailure(System.err::println);
@@ -142,89 +146,88 @@ public class MainAdaptor {
         return graphs;
     }
 
-    public static List<MatchedNode> getMatchedNodes(String filename, String lpatternname, Module codeModule, Module lpatternModule) {
-        List<MatchedNode> graphs;
-        FunctionDef func = null;
-        for (org.python.antlr.base.stmt stmt : codeModule.getInternalBody()) {
-            if (stmt instanceof FunctionDef) {
-                func = (FunctionDef) stmt;
-                break;
-            } else if (stmt instanceof ClassDef) {
-                for (org.python.antlr.base.stmt stmt1 : ((ClassDef) stmt).getInternalBody()) {
-                    if (stmt1 instanceof FunctionDef) {
-                        func = (FunctionDef) stmt1;
-                        break;
-                    }
-                }
-
-            }
-        }
-        PDGBuildingContext fcontext = null;
-        fcontext = Try.of(() -> new PDGBuildingContext(codeModule.getInternalBody().stream().filter(x -> x instanceof Import
-                || x instanceof ImportFrom).collect(Collectors.toList()), filename)).onFailure(x -> System.err.println()).get();
-        PDGGraph fpdg = new PDGGraph(func, fcontext);
-//        fpdg.getNodes().forEach(x-> System.out.println(x.getId()));
-        Guards guards = new Guards(Try.of(() -> com.utils.Utils.getFileContent(lpatternname))
-                .onFailure(System.out::println).get(), lpatternModule);
-        TypeWrapper wrapper = new TypeWrapper(guards);
-        PDGBuildingContext mcontext = new PDGBuildingContext(lpatternModule.getInternalBody().stream().filter(x -> x instanceof Import
-                || x instanceof ImportFrom).collect(Collectors.toList()), wrapper);
-        PDGGraph mpdg = new PDGGraph(lpatternModule, mcontext);
-        MatchPDG match = new MatchPDG();
-        graphs = match.getSubGraphs(mpdg, fpdg, mcontext, fcontext);
-        graphs.forEach(x -> x.updateAllMatchedNodes(x, mpdg));
-        List<MatchedNode> finalPatterns = graphs.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
-
-        Try.of(() -> Files.createDirectories(Paths.get(new File("OUTPUT/matches/" + filename.
-                substring(0, filename.lastIndexOf('.')) + ".dot").getParent()))).onFailure(System.err::println);
-        if (Configurations.CREATE_DEBUG_IMAGES){
-            match.drawMatchedGraphs(fpdg, graphs.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList()),
-                    "OUTPUT/matches/" + filename.substring(0, filename.lastIndexOf('.')) + ".dot");
-            com.utils.Utils.markNodesInCode(Configurations.PROJECT_REPOSITORY + filename,
-                    graphs.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList()), "OUTPUT/matches/" +
-                            filename.substring(0, filename.lastIndexOf('.')) + ".html", "", "x@x");
-
-        }
-        return graphs;
-    }
-
-    public static List<MatchedNode> getMatchedNodes(List<stmt> imports, Guards guard, Module codeModule, Module lpatternModule) throws IOException {
-        List<MatchedNode> graphs;
-        FunctionDef func = null;
-        for (org.python.antlr.base.stmt stmt : codeModule.getInternalBody()) {
-            if (stmt instanceof FunctionDef) {
-                func = (FunctionDef) stmt;
-                break;
-            } else if (stmt instanceof ClassDef) {
-                for (org.python.antlr.base.stmt stmt1 : ((ClassDef) stmt).getInternalBody()) {
-                    if (stmt1 instanceof FunctionDef) {
-                        func = (FunctionDef) stmt1;
-                        break;
-                    }
-                }
-
-            }
-        }
-        PDGBuildingContext fcontext = null;
-        fcontext = new PDGBuildingContext(imports, "");
-        PDGGraph fpdg = new PDGGraph(func, fcontext);
-        TypeWrapper wrapper = new TypeWrapper(guard);
-        PDGBuildingContext mcontext = new PDGBuildingContext(lpatternModule.getInternalBody().stream().filter(x -> x instanceof Import
-                || x instanceof ImportFrom).collect(Collectors.toList()), wrapper);
-        PDGGraph mpdg = new PDGGraph(lpatternModule, mcontext);
-        MatchPDG match = new MatchPDG();
-        graphs = match.getSubGraphs(mpdg, fpdg, mcontext, fcontext);
-        graphs.forEach(x -> x.updateAllMatchedNodes(x, mpdg));
-        List<MatchedNode> finalPatterns = graphs.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
-        return finalPatterns;
-    }
+//    public static List<MatchedNode> getMatchedNodes(String filename, String lpatternname, Module codeModule, Module lpatternModule) {
+//        List<MatchedNode> graphs;
+//        FunctionDef func = null;
+//        for (org.python.antlr.base.stmt stmt : codeModule.getInternalBody()) {
+//            if (stmt instanceof FunctionDef) {
+//                func = (FunctionDef) stmt;
+//                break;
+//            } else if (stmt instanceof ClassDef) {
+//                for (org.python.antlr.base.stmt stmt1 : ((ClassDef) stmt).getInternalBody()) {
+//                    if (stmt1 instanceof FunctionDef) {
+//                        func = (FunctionDef) stmt1;
+//                        break;
+//                    }
+//                }
+//
+//            }
+//        }
+//        PDGBuildingContext fcontext = null;
+//        fcontext = Try.of(() -> new PDGBuildingContext(codeModule.getInternalBody().stream().filter(x -> x instanceof Import
+//                || x instanceof ImportFrom).collect(Collectors.toList()), filename)).onFailure(x -> System.err.println()).get();
+//        PDGGraph fpdg = new PDGGraph(func, fcontext);
+////        fpdg.getNodes().forEach(x-> System.out.println(x.getId()));
+//        Guards guards = new Guards(Try.of(() -> com.utils.Utils.getFileContent(lpatternname))
+//                .onFailure(System.out::println).get(), lpatternModule);
+//        TypeWrapper wrapper = new TypeWrapper(guards);
+//        PDGBuildingContext mcontext = new PDGBuildingContext(lpatternModule.getInternalBody().stream().filter(x -> x instanceof Import
+//                || x instanceof ImportFrom).collect(Collectors.toList()), wrapper);
+//        PDGGraph mpdg = new PDGGraph(lpatternModule, mcontext);
+//        MatchPDG match = new MatchPDG();
+//        graphs = match.getSubGraphs(mpdg, fpdg, mcontext, fcontext);
+//        graphs.forEach(x -> x.updateAllMatchedNodes(x, mpdg));
+//        List<MatchedNode> finalPatterns = graphs.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
+//
+//        Try.of(() -> Files.createDirectories(Paths.get(new File("OUTPUT/matches/" + filename.
+//                substring(0, filename.lastIndexOf('.')) + ".dot").getParent()))).onFailure(System.err::println);
+//        if (Configurations.CREATE_DEBUG_IMAGES){
+//            match.drawMatchedGraphs(fpdg, graphs.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList()),
+//                    "OUTPUT/matches/" + filename.substring(0, filename.lastIndexOf('.')) + ".dot");
+//            com.utils.Utils.markNodesInCode(Configurations.PROJECT_REPOSITORY + filename,
+//                    graphs.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList()), "OUTPUT/matches/" +
+//                            filename.substring(0, filename.lastIndexOf('.')) + ".html", "", "x@x");
+//
+//        }
+//        return graphs;
+//    }
+//
+//    public static List<MatchedNode> getMatchedNodes(List<stmt> imports, Guards guard, Module codeModule, Module lpatternModule) throws IOException {
+//        List<MatchedNode> graphs;
+//        FunctionDef func = null;
+//        for (org.python.antlr.base.stmt stmt : codeModule.getInternalBody()) {
+//            if (stmt instanceof FunctionDef) {
+//                func = (FunctionDef) stmt;
+//                break;
+//            } else if (stmt instanceof ClassDef) {
+//                for (org.python.antlr.base.stmt stmt1 : ((ClassDef) stmt).getInternalBody()) {
+//                    if (stmt1 instanceof FunctionDef) {
+//                        func = (FunctionDef) stmt1;
+//                        break;
+//                    }
+//                }
+//
+//            }
+//        }
+//        PDGBuildingContext fcontext = null;
+//        fcontext = new PDGBuildingContext(imports, "");
+//        PDGGraph fpdg = new PDGGraph(func, fcontext);
+//        TypeWrapper wrapper = new TypeWrapper(guard);
+//        PDGBuildingContext mcontext = new PDGBuildingContext(lpatternModule.getInternalBody().stream().filter(x -> x instanceof Import
+//                || x instanceof ImportFrom).collect(Collectors.toList()), wrapper);
+//        PDGGraph mpdg = new PDGGraph(lpatternModule, mcontext);
+//        MatchPDG match = new MatchPDG();
+//        graphs = match.getSubGraphs(mpdg, fpdg, mcontext, fcontext);
+//        graphs.forEach(x -> x.updateAllMatchedNodes(x, mpdg));
+//        List<MatchedNode> finalPatterns = graphs.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
+//        return finalPatterns;
+//    }
 
     public static String transplantPatternToFile(String filename, String LHS, String RHS, boolean replaceFile) {
         BasicCombyOperations op = new BasicCombyOperations();
-        Module codeModule = Utils.getPythonModule(Configurations.PROJECT_REPOSITORY + filename);
+        CompilationUnit codeModule = Utils.getPythonModule(Configurations.PROJECT_REPOSITORY + filename); //JavaASTUtil?
         String sourceCode = FileIO.readFile(Configurations.PROJECT_REPOSITORY + filename);
-        List<org.python.antlr.base.stmt> imports = codeModule.getInternalBody().stream().filter(x -> x instanceof Import
-                || x instanceof ImportFrom).collect(Collectors.toList());
+        List<ImportDeclaration> imports = codeModule.imports();
         String adaptedFunction = "";
         Map<Integer, String> functionStarts = new HashMap<>();
         StringBuilder adaptedFile = new StringBuilder();
@@ -260,11 +263,11 @@ public class MainAdaptor {
         return adaptedFile.toString();
     }
 
-    public static String transplantPatternToFunction(String filename, FunctionDef def, List<stmt> imports, String LHS, String RHS, String codeInFile) {
+    public static String transplantPatternToFunction(String filename, MethodDeclaration def, List<ImportDeclaration> imports, String LHS, String RHS, String codeInFile) {
         BasicCombyOperations op = new BasicCombyOperations();
-        String code = def.toString();
-        Module lpatternModule = Utils.getPythonModuleForTemplate(LHS).onFailure(System.err::println).get();
-        Module rpatternModule = Utils.getPythonModuleForTemplate(RHS).onFailure(System.err::println).get();
+        String code = def.toString(); //TODO: test if this is the actual code
+        CompilationUnit lpatternModule = Utils.getPythonModuleForTemplate(LHS).onFailure(System.err::println).get();
+        CompilationUnit rpatternModule = Utils.getPythonModuleForTemplate(RHS).onFailure(System.err::println).get();
 
         List<MatchedNode> matchedNodes = getMatchedNodes(filename, LHS, def, imports, lpatternModule);
         List<MatchedNode> allMatchedGraphs = matchedNodes.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
@@ -372,16 +375,16 @@ public class MainAdaptor {
                 "ProjectFiles",cmd.getOptionValue("files"),"Patterns",cmd.getOptionValue("patterns"));
     }
 
-    public String adaptFunction(List<stmt> imports, Guards guard, Module pLeft, Module pRight, Module function) throws Exception {
-        List<MatchedNode> matchedNodes = getMatchedNodes(imports, guard, function, pLeft);
-        FunctionDef func = (FunctionDef) function.getInternalBody().stream().filter(x -> x instanceof FunctionDef).findFirst().get();
-        List<MatchedNode> allMatchedGraphs = matchedNodes.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
-        AdaptRule aRule = new AdaptRule(allMatchedGraphs.get(0), Utils.getAllFunctions(pLeft).get(0), pRight);
-        BasicCombyOperations op = new BasicCombyOperations();
-        Try<CombyRewrite> changedCode = op.rewrite(aRule.getAdaptedRule().getLHS(), aRule.getAdaptedRule().getRHS(), func.toString(), ".python");
-        return changedCode.get().getRewrittenSource();
-
-    }
+//    public String adaptFunction(List<stmt> imports, Guards guard, Module pLeft, Module pRight, Module function) throws Exception {
+//        List<MatchedNode> matchedNodes = getMatchedNodes(imports, guard, function, pLeft);
+//        FunctionDef func = (FunctionDef) function.getInternalBody().stream().filter(x -> x instanceof FunctionDef).findFirst().get();
+//        List<MatchedNode> allMatchedGraphs = matchedNodes.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
+//        AdaptRule aRule = new AdaptRule(allMatchedGraphs.get(0), Utils.getAllFunctions(pLeft).get(0), pRight);
+//        BasicCombyOperations op = new BasicCombyOperations();
+//        Try<CombyRewrite> changedCode = op.rewrite(aRule.getAdaptedRule().getLHS(), aRule.getAdaptedRule().getRHS(), func.toString(), ".python");
+//        return changedCode.get().getRewrittenSource();
+//
+//    }
 
 }
 

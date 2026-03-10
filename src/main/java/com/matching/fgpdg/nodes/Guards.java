@@ -2,6 +2,10 @@ package com.matching.fgpdg.nodes;
 
 import com.ibm.wala.util.collections.Pair;
 import org.antlr.runtime.ANTLRStringStream;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Name;
 import org.python.antlr.AnalyzingParser;
 import org.python.antlr.Visitor;
 import org.python.antlr.ast.*;
@@ -43,27 +47,28 @@ public class Guards {
     }
 
 
-    public static mod parsePython(String code) {
-        ANTLRStringStream antlrSting = new ANTLRStringStream(code);
-        AnalyzingParser p = new AnalyzingParser(antlrSting, "", "ascii");
-        return p.parseModule();
-    }
+//    public static mod parsePython(String code) {
+//        ANTLRStringStream antlrSting = new ANTLRStringStream(code);
+//        AnalyzingParser p = new AnalyzingParser(antlrSting, "", "ascii");
+//        return p.parseModule();
+//    }
 
-    static class PyNameVisitor extends Visitor {
+    static class PyNameVisitor extends ASTVisitor {
         private HashMap<String, List<Pair<Integer, Integer>>> mapRowCol = new HashMap<>();
 
         @Override
-        public void preVisit(PyObject node) {
+        public void preVisit(ASTNode node) {
 
         }
 
         @Override
-        public void postVisit(PyObject node) {
+        public void postVisit(ASTNode node) {
 
         }
 
+        //TODO: what is this for????????
         @Override
-        public Object visitName(Name node) throws Exception {
+        public Object visit(Name node) throws Exception {
             if (mapRowCol.get(node.getInternalId())==null){
                 ArrayList<Pair<Integer,Integer>> arrayRowCol = new ArrayList<>();
                 arrayRowCol.add(Pair.make(node.getLineno(),node.getCol_offset()));
@@ -72,22 +77,24 @@ public class Guards {
             else{
                 mapRowCol.get(node.getInternalId()).add(Pair.make(node.getLineno(),node.getCol_offset()));
             }
-            return super.visitName(node);
+            return super.visit(node);
         }
 
-        @Override
-        public Object visitHole(Hole node) throws Exception {
-            if (mapRowCol.get(node.toString())==null){
-                ArrayList<Pair<Integer,Integer>> arrayRowCol = new ArrayList<>();
-                arrayRowCol.add(Pair.make(node.getLineno(),node.getCol_offset()));
-                mapRowCol.put(node.toString(),arrayRowCol);
-            }
-            else{
-                mapRowCol.get(node.toString()).add(Pair.make(node.getLineno(),node.getCol_offset()));
-            }
+        //TODO: check on this later
+//        @Override
+//        public Object visitHole(Hole node) throws Exception {
+//            if (mapRowCol.get(node.toString())==null){
+//                ArrayList<Pair<Integer,Integer>> arrayRowCol = new ArrayList<>();
+//                arrayRowCol.add(Pair.make(node.getLineno(),node.getCol_offset()));
+//                mapRowCol.put(node.toString(),arrayRowCol);
+//            }
+//            else{
+//                mapRowCol.get(node.toString()).add(Pair.make(node.getLineno(),node.getCol_offset()));
+//            }
+//
+//            return super.visitHole(node);
+//        }
 
-            return super.visitHole(node);
-        }
 //        @Override
 //        public Object visitAttribute(Attribute node) throws Exception {
 //            if (node.getInternalValue() instanceof Name){
