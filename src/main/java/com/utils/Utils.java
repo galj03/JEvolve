@@ -32,15 +32,15 @@ import java.util.stream.Collectors;
 
 public class Utils {
     private static int thresholdForIterations = 10;
-    public static List<PyObject> getMatchedASTSubGraph(MatchedNode matchedNode, FunctionDef def) {
-        List<PyObject> codeNodes = matchedNode.getAllMatchedNodes().stream().map(d->d.getCodeNode().getAstNode()).collect(Collectors.toList());
-        List<PyObject> withoutChildNodes = new ArrayList<>(getNonSubTreeASTNodes(codeNodes));
+    public static List<ASTNode> getMatchedASTSubGraph(MatchedNode matchedNode, MethodDeclaration def) {
+        List<ASTNode> codeNodes = matchedNode.getAllMatchedNodes().stream().map(d->d.getCodeNode().getAstNode()).collect(Collectors.toList());
+        List<ASTNode> withoutChildNodes = new ArrayList<>(getNonSubTreeASTNodes(codeNodes));
         if (doesEveryNodeHaveTheSameParent(withoutChildNodes))
         {
             return withoutChildNodes;
         }
         else{
-            List<PyObject> parentNodes = visitOneLevelUPToGetCommonParents(withoutChildNodes);
+            List<ASTNode> parentNodes = visitOneLevelUPToGetCommonParents(withoutChildNodes);
             for (int t=0;t<thresholdForIterations;t++){
                 if (doesEveryNodeHaveTheSameParent(parentNodes))
                     return parentNodes;
@@ -54,12 +54,12 @@ public class Utils {
         return withoutChildNodes;
     }
 
-    private static List<PyObject> visitOneLevelUPToGetCommonParents(List<PyObject> nodeList){
-        List<PyObject> newNodeList = new ArrayList<>();
-        List<PyObject> childList = new ArrayList<>();
+    private static List<ASTNode> visitOneLevelUPToGetCommonParents(List<ASTNode> nodeList){
+        List<ASTNode> newNodeList = new ArrayList<>();
+        List<ASTNode> childList = new ArrayList<>();
         for (int r =0;r<nodeList.size();r++){
             PythonTree tree = (PythonTree)nodeList.get(r);
-            for (PyObject node : nodeList) {
+            for (ASTNode node : nodeList) {
                 if (node!=tree && tree.getParent()!=null){
                     if (Utils.isChildNode(node,tree.getParent())){
                         newNodeList.add(tree.getParent());
@@ -85,9 +85,10 @@ public class Utils {
         return newNodeList;
     }
 
-    private static boolean doesEveryNodeHaveTheSameParent(List<PyObject> nodes){
-        Set<PyObject> parents = new HashSet<>();
-        for (PyObject node : nodes) {
+    //TODO
+    private static boolean doesEveryNodeHaveTheSameParent(List<ASTNode> nodes){
+        Set<ASTNode> parents = new HashSet<>();
+        for (ASTNode node : nodes) {
             PythonTree n = (PythonTree)node;
             if (node instanceof Call && ((Call) node).getParent()!=null && ((Call) node).getParent() instanceof Expr){
                 parents.add(((Call) node).getParent().getParent());
@@ -100,11 +101,11 @@ public class Utils {
         return parents.size() == 1;
     }
 
-    private static List<PyObject> getNonSubTreeASTNodes(List<PyObject> codeNodes) {
-        List<List<PyObject>> permutations = codeNodes.stream().map(e1 -> codeNodes.stream().filter(e2 -> e2 != e1).
+    private static List<ASTNode> getNonSubTreeASTNodes(List<ASTNode> codeNodes) {
+        List<List<ASTNode>> permutations = codeNodes.stream().map(e1 -> codeNodes.stream().filter(e2 -> e2 != e1).
                 map(e3 -> Arrays.asList(e1, e3)).collect(Collectors.toList())).flatMap(List::stream).collect(Collectors.toList());
-        List<PyObject> parentNodes = new ArrayList<>();
-        for (List<PyObject> objects : permutations) {
+        List<ASTNode> parentNodes = new ArrayList<>();
+        for (List<ASTNode> objects : permutations) {
             if (objects.get(0)!=null && objects.get(1)!=null && Utils.isChildNode(objects.get(0),objects.get(1))){
                 updateTheListWithParentNode(parentNodes, objects, 1);
 
@@ -119,8 +120,8 @@ public class Utils {
                 }
             }
         }
-        List<PyObject> updatedParentNodes = new ArrayList<>();
-        for (PyObject node : parentNodes) {
+        List<ASTNode> updatedParentNodes = new ArrayList<>();
+        for (ASTNode node : parentNodes) { //TODO: think about this
             if (node instanceof Call && ((Call) node).getParent() instanceof Expr){
                 updatedParentNodes.add(((Call) node).getParent());
             }
@@ -131,7 +132,7 @@ public class Utils {
         return updatedParentNodes;
     }
 
-    private static void updateTheListWithParentNode(List<PyObject> parentNodes, List<PyObject> objects, int i) {
+    private static void updateTheListWithParentNode(List<ASTNode> parentNodes, List<ASTNode> objects, int i) {
         if (parentNodes.stream().noneMatch(x -> Utils.isChildNode(objects.get(i), x))) {
             for (int u = 0; u < parentNodes.size(); u++) {
                 if (Utils.isChildNode(parentNodes.get(u), objects.get(i))) {
@@ -145,10 +146,10 @@ public class Utils {
     }
 
 
-    public static boolean isChildNode(PyObject childNode, PyObject parentNode){
+    public static boolean isChildNode(ASTNode childNode, ASTNode parentNode){
         CheckChildNode childChecker = new CheckChildNode(childNode);
         try {
-            PythonTree tree = (PythonTree)parentNode;
+            PythonTree tree = (PythonTree)parentNode; //TODO: what is this Tree???
             childChecker.visit(tree);
         } catch (Exception e) {
             e.printStackTrace();
@@ -489,10 +490,10 @@ public class Utils {
         return Try.of(()->parser.parseTemplates(FileIO.readStringFromFile(fileName)));
     }
 
-    public static List<PyObject> getContinousStatments(List<PyObject> subtree) {
+    public static List<ASTNode> getContinousStatments(List<ASTNode> subtree) {
         int start = subtree.stream().map(x -> (PythonTree) x).map(PythonTree::getCharStartIndex).min(Integer::compare).get();
         int stop = subtree.stream().map(x -> (PythonTree) x).map(PythonTree::getCharStopIndex).max(Integer::compare).get();
-        List<PyObject> continousNodes  = new ArrayList<>();
+        List<ASTNode> continousNodes  = new ArrayList<>();
         if (subtree.size()>0){
             for (PythonTree child : ((PythonTree) subtree.get(0)).getParent().getChildren()) {
                 if (start<=child.getCharStartIndex() && child.getCharStartIndex()<=stop){
@@ -503,28 +504,29 @@ public class Utils {
         return continousNodes;
     }
 
-    static class CheckChildNode extends Visitor{
+    //TODO: trees again...
+    static class CheckChildNode extends ASTVisitor{
         private boolean isChild = false;
         private PythonTree childTree=null;
         public CheckChildNode(PythonTree cTree) {
             this.childTree = cTree;
         }
 
-        public CheckChildNode(PyObject cTree) {
+        public CheckChildNode(ASTNode cTree) {
             this.childTree = (PythonTree)cTree;
         }
 
         @Override
-        public void preVisit(PyObject node) {
+        public void preVisit(ASTNode node) {
 
         }
 
         @Override
-        public void postVisit(PyObject node) {
+        public void postVisit(ASTNode node) {
 
         }
 
-
+        //TODO: find an equivalent for this
         @Override
         public Object unhandled_node(PythonTree node) throws Exception {
             if (childTree!=null && node.getChildren()!=null && node.getChildren().contains(childTree))

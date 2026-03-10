@@ -13,6 +13,7 @@ import com.utils.FileIO;
 import com.utils.Utils;
 import io.vavr.control.Try;
 import org.apache.commons.cli.*;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -233,11 +234,11 @@ public class MainAdaptor {
         StringBuilder adaptedFile = new StringBuilder();
         List<String> splittedFile = new ArrayList<>();
         int previousStop = 0;
-        for (stmt stmt : Utils.getAllFunctions(codeModule)) {
-            if (((FunctionDef) stmt).getInternalBody().size()>0){
-                int charStartIndex = stmt.getCharStartIndex();
-                int charStopIndex = ((FunctionDef) stmt).getInternalBody().get(((FunctionDef) stmt).getInternalBody().size() - 1).getCharStopIndex();
-                adaptedFunction = MainAdaptor.transplantPatternToFunction(filename, (FunctionDef) stmt, imports, LHS, RHS,sourceCode);
+        for (MethodDeclaration stmt : Utils.getAllFunctions(codeModule)) {
+            if (!stmt.getBody().statements().isEmpty()){ //prev:  .getInternalBody().size()
+                int charStartIndex = stmt.getBody().getStartPosition();// .getCharStartIndex();
+                int charStopIndex = stmt.getBody().getLength();//TODO: check!!!!! // .getInternalBody().get(stmt.getInternalBody().size() - 1).getCharStopIndex();
+                adaptedFunction = MainAdaptor.transplantPatternToFunction(filename, stmt, imports, LHS, RHS,sourceCode);
 
                 int numberOfTrailingSpacesAndNewLines = 0;
 
@@ -272,8 +273,9 @@ public class MainAdaptor {
         List<MatchedNode> matchedNodes = getMatchedNodes(filename, LHS, def, imports, lpatternModule);
         List<MatchedNode> allMatchedGraphs = matchedNodes.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
 
+        //TODO: why check only 1??? - allMatchedGraphs
         if (allMatchedGraphs.size() != 0) {
-            List<PyObject> subtree = Utils.getMatchedASTSubGraph(allMatchedGraphs.get(0), def);
+            List<ASTNode> subtree = Utils.getMatchedASTSubGraph(allMatchedGraphs.get(0), def);
             List<stmt> continuousStmts = Utils.getContinousStatments(subtree).stream().map(x -> (stmt) x).collect(Collectors.toList());
 
             int charStartIndex = continuousStmts.get(0).getCharStartIndex();
