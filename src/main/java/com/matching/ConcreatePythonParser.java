@@ -6,6 +6,8 @@ import com.utils.Assertions;
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CharStream;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.python.antlr.AnalyzingParser;
 import org.python.antlr.PythonTree;
@@ -103,7 +105,7 @@ public class ConcreatePythonParser  {
         }
     }
 
-    class PyHoleVisitorAndRepair extends Visitor {
+    class PyHoleVisitorAndRepair extends ASTVisitor {
         @Override
         public Object visitIndex(Index node) throws Exception {
             Hole lhole=null;
@@ -122,12 +124,12 @@ public class ConcreatePythonParser  {
         }
 
         @Override
-        public void preVisit(PyObject node) {
+        public void preVisit(ASTNode node) {
 
         }
 
         @Override
-        public void postVisit(PyObject node) {
+        public void postVisit(ASTNode node) {
 
         }
 
@@ -653,7 +655,7 @@ public class ConcreatePythonParser  {
 
     }
 
-    class ParentUpdater extends Visitor {
+    class ParentUpdater extends ASTVisitor {
         @Override
         public Object visitExtSlice(ExtSlice node) throws Exception {
             updateParent(node);
@@ -663,7 +665,7 @@ public class ConcreatePythonParser  {
         }
 
         @Override
-        public Object visitExpr(Expr node) throws Exception {
+        public Object visitExpr(Eexpr node) throws Exception {
             updateParent(node);
 
 //            node.getInternalValue().setParent(node);
@@ -671,12 +673,12 @@ public class ConcreatePythonParser  {
         }
 
         @Override
-        public void preVisit(PyObject node) {
+        public void preVisit(ASTNode node) {
 
         }
 
         @Override
-        public void postVisit(PyObject node) {
+        public void postVisit(ASTNode node) {
 
         }
 

@@ -39,7 +39,7 @@ public class JavaASTUtil {
 		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_7);
 		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_7);
 		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_7);
-		ASTParser parser = ASTParser.newParser(AST.JLS4);
+		ASTParser parser = ASTParser.newParser(AST.JLS15);
     	parser.setSource(source.toCharArray());
     	parser.setCompilerOptions(options);
     	ASTNode ast = parser.createAST(null);
@@ -52,7 +52,7 @@ public class JavaASTUtil {
 		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_7);
 		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_7);
 		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_7);
-		ASTParser parser = ASTParser.newParser(AST.JLS4);
+		ASTParser parser = ASTParser.newParser(AST.JLS15);
     	parser.setSource(source.toCharArray());
     	parser.setCompilerOptions(options);
 		parser.setEnvironment(
@@ -73,7 +73,7 @@ public class JavaASTUtil {
 		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_7);
 		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_7);
 		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_7);
-		ASTParser parser = ASTParser.newParser(AST.JLS4);
+		ASTParser parser = ASTParser.newParser(AST.JLS15);
     	parser.setSource(source.toCharArray());
     	parser.setCompilerOptions(options);
     	parser.setKind(kind);

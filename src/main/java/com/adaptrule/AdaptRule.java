@@ -3,6 +3,7 @@ package com.adaptrule;
 import com.matching.fgpdg.MatchedNode;
 import com.matching.fgpdg.nodes.Guards;
 import com.matching.fgpdg.nodes.PDGNode;
+import org.eclipse.jdt.core.dom.*;
 import org.python.antlr.PythonTree;
 import org.python.antlr.ast.*;
 import org.python.antlr.ast.Module;
@@ -18,10 +19,10 @@ import java.util.stream.Collectors;
 
 public class AdaptRule {
     MatchedNode graph;
-    FunctionDef targetCodeAST;
+    MethodDeclaration targetCodeAST;
     Module rhsAST;
     Map<PythonTree, Hole> nameToHole;
-    public AdaptRule(MatchedNode graph, FunctionDef targetCodeAST, Module rpatternModule) {
+    public AdaptRule(MatchedNode graph, MethodDeclaration targetCodeAST, Module rpatternModule) {
         this.graph = graph;
         this.targetCodeAST = targetCodeAST;
         this.rhsAST = rpatternModule;
@@ -29,48 +30,46 @@ public class AdaptRule {
 
     public Rule getAdaptedRule() {
         Rule rule=new Rule();
-        FunctionDef lhsSubstitutedCode = substituteLHStoTargetCode();
+        MethodDeclaration lhsSubstitutedCode = substituteLHStoTargetCode();
         System.out.println(lhsSubstitutedCode);
-        FunctionDef renamedNames = renameRestOfTheRenamedVarsWithHoles(lhsSubstitutedCode);
-        FunctionDef lhs = normalizeLHSContext(renamedNames);
+        MethodDeclaration renamedNames = renameRestOfTheRenamedVarsWithHoles(lhsSubstitutedCode);
+        MethodDeclaration lhs = normalizeLHSContext(renamedNames);
         System.out.println(lhs);
-        List<PyObject> collect = this.graph.getAllMatchedNodes().stream().map(MatchedNode::getPatternNode).
+        List<ASTNode> collect = this.graph.getAllMatchedNodes().stream().map(MatchedNode::getPatternNode).
                 map(PDGNode::getAstNode).collect(Collectors.toList());
         collect.addAll(this.graph.getAllMatchedNodes().stream().map(MatchedNode::getCodeNode).
                 map(PDGNode::getAstNode).collect(Collectors.toList()));
         rule.setLHS(lhs.getInternalBody().stream().map(Object::toString).collect(Collectors.joining("\n")));
-        FunctionDef rhs = createRHS(renamedNames,rhsAST,collect);
+        MethodDeclaration rhs = createRHS(renamedNames,rhsAST,collect);
         rule.setRHS(rhs.getInternalBody().stream().map(Object::toString).collect(Collectors.joining("\n")));
 //        System.out.println(getFunctionDef(rhs).toString());
         return rule;
     }
 
-    public FunctionDef getFunctionDef(Module md){
-        for (stmt stmt : md.getInternalBody()) {
-            if (stmt instanceof FunctionDef)
-                return (FunctionDef)stmt;
+    public MethodDeclaration getFunctionDef(Module md){
+        for (BodyDeclaration stmt : md.getInternalBody()) { //TODO: fix this, how to get methods?
+            if (stmt instanceof MethodDeclaration)
+                return (MethodDeclaration)stmt;
         }
         return null;
     }
 
-    private FunctionDef createRHS(FunctionDef lhs, Module rhs, List<PyObject> matchedNode) {
+    private MethodDeclaration createRHS(MethodDeclaration lhs, Module rhs, List<ASTNode> matchedNode) {
         FindDeletesFromLHS deletes = new FindDeletesFromLHS(matchedNode);
         try {
             deletes.visit(lhs);
             while (true){
-                PythonTree updateTree = checkFinalDeleteNodeIsAChildOfOtherDeletes(deletes.deletes,deletes.finalDeletedNode);
-                if (updateTree==deletes.finalDeletedNode)
+                ASTNode updateTree = checkFinalDeleteNodeIsAChildOfOtherDeletes(deletes.deletes, deletes.finalDeletedNode);
+                if (deletes.finalDeletedNode.equals(updateTree))
                     break;
                 else{
-                    if (updateTree instanceof Call && updateTree.getParent()!=null && updateTree.getParent() instanceof Expr){
+                    if (updateTree instanceof Call && updateTree.getParent()!=null
+                            && updateTree.getParent() instanceof Expression){
                         deletes.finalDeletedNode=updateTree.getParent();
                     }
                     else{
                         deletes.finalDeletedNode=updateTree;
                     }
-
-
-
                 }
             }
 
@@ -90,10 +89,10 @@ public class AdaptRule {
         return lhs;
     }
 
-    private PythonTree checkFinalDeleteNodeIsAChildOfOtherDeletes(List<PythonTree> childs,PythonTree finalNode){
-        for (PythonTree tree : childs) {
-            for (PythonTree child : tree.getChildren()) {
-                if (child==finalNode){
+    private ASTNode checkFinalDeleteNodeIsAChildOfOtherDeletes(List<ASTNode> childs, ASTNode finalNode){
+        for (ASTNode tree : childs) {
+            for (ASTNode child : tree.getChildren()) { //TODO: get ast node's children
+                if (finalNode.equals(child)){
                     return tree;
                  }
             }
@@ -101,7 +100,7 @@ public class AdaptRule {
         return finalNode;
     }
 
-    private FunctionDef normalizeLHSContext(FunctionDef code){
+    private MethodDeclaration normalizeLHSContext(MethodDeclaration code){
         HoleSearcher searcher = new HoleSearcher();
         try {
             searcher.visit(code);
@@ -116,7 +115,7 @@ public class AdaptRule {
         return code;
     }
 
-    private FunctionDef substituteLHStoTargetCode(){
+    private MethodDeclaration substituteLHStoTargetCode(){
         Map<PythonTree, List<PythonTree>> codeAndParaNode = new HashMap<>();
         for (MatchedNode matchedNode : graph.getAllMatchedNodes()) {
             PythonTree pASTNode = (PythonTree)matchedNode.getPatternNode().getAstNode();
@@ -146,7 +145,7 @@ public class AdaptRule {
         return targetCodeAST;
     }
 
-    private FunctionDef renameRestOfTheRenamedVarsWithHoles(FunctionDef targetCode){
+    private MethodDeclaration renameRestOfTheRenamedVarsWithHoles(MethodDeclaration targetCode){
         Map<PythonTree, List<PythonTree>> codeAndParaNode = new HashMap<>();
         CollectChangedNames changedNames = new CollectChangedNames(nameToHole.keySet());
         try {
@@ -171,11 +170,4 @@ public class AdaptRule {
         return targetCode;
 
     }
-
-//    private Module RenameTemplateVars(List<PyObject> matchedCodeNodes, Module targetCodeAST){
-//
-//    }
-
-
-
 }
