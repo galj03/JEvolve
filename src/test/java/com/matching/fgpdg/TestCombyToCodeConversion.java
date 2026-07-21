@@ -1,6 +1,6 @@
 package com.matching.fgpdg;
 
-import com.matching.ConcreatePythonParser;
+import com.matching.ConcreteJavaParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.python.antlr.ast.Module;
@@ -10,7 +10,7 @@ public class TestCombyToCodeConversion {
     void testTemplate1() throws Exception {
         String code = "for i in range(1, :[[l1]]):\n" +
                 "   print(num, 'x', i, '=', :[[l2]]*:[[l3]])";
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         String s = parser.convertComByTemplateToParsableCode(code);
         Assertions.assertEquals("for i in range(1, [$1]):\n   print(num, 'x', i, '=', [$2]*[$3])",s);
         System.out.println(s);
@@ -24,7 +24,7 @@ public class TestCombyToCodeConversion {
                 "                \"    if (:[[l7]]):\\n\" +\n" +
                 "                \"        xx.ccc.fff()\\n\" +\n" +
                 "                \"        :[[l8]].:[[l7]].:[[l6]](2*:[[l9]])";
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         String s = parser.convertComByTemplateToParsableCode(code);
         Assertions.assertEquals("\"for [$2] in [$6]:\\n\" +\n" +
                 "                \"    boo()\\n\" +\n" +
@@ -41,7 +41,7 @@ public class TestCombyToCodeConversion {
                 "{'one':3,:[[l56]]::[[l57]],:[[l58]]::[[l59]]}\n" +
                 "\n" +
                 "{ 3,:[[l56]],:[[l57]],:[[l58]],:[[l59]]}";
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         String s = parser.convertComByTemplateToParsableCode(code);
         Assertions.assertEquals("[[$51],[$52],[$53],4,5,[%14]]\n" +
                 "{'one':3,[$56]:[$57],[$58]:[$59]}\n" +

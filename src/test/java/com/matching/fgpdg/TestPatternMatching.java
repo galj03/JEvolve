@@ -1,6 +1,6 @@
 package com.matching.fgpdg;
 
-import com.matching.ConcreatePythonParser;
+import com.matching.ConcreteJavaParser;
 import com.matching.fgpdg.nodes.Guards;
 import com.matching.fgpdg.nodes.TypeInfo.TypeWrapper;
 import com.utils.DotGraph;
@@ -35,7 +35,7 @@ public class TestPatternMatching {
     }
 
     private Module getPythonModuleForTemplate(String fileName) throws Exception {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         return parser.parseTemplates(FileIO.readStringFromFile(fileName));
     }
 
@@ -136,7 +136,7 @@ public class TestPatternMatching {
     }
 
     private Module getPythonModule(String fileName){
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         return parser.parse(fileName);
     }
 

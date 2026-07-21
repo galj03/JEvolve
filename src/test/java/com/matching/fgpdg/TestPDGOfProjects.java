@@ -1,9 +1,8 @@
 package com.matching.fgpdg;
 
-import com.matching.ConcreatePythonParser;
+import com.matching.ConcreteJavaParser;
 import com.utils.DotGraph;
 import org.inferrules.Utils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.python.antlr.Visitor;
 import org.python.antlr.ast.*;
@@ -13,14 +12,12 @@ import org.python.modules.thread._thread$exit_exposer;
 
 import java.io.File;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static java.lang.System.exit;
 import static org.inferrules.Utils.getAllFunctions;
 
 public class TestPDGOfProjects {
@@ -31,7 +28,7 @@ public class TestPDGOfProjects {
         ArrayList<File> files = Utils.getPythonFiles(Objects.requireNonNull(dir.listFiles()));
         for (File file : files) {
             System.out.println(file.getAbsolutePath());
-            ConcreatePythonParser parser = new ConcreatePythonParser();
+            ConcreteJavaParser parser = new ConcreteJavaParser();
             Module parse = parser.parse(file.getAbsolutePath());
             List<stmt> collect = parse.getInternalBody().stream().filter(x -> x instanceof Import
                     || x instanceof ImportFrom).collect(Collectors.toList());
@@ -57,7 +54,7 @@ public class TestPDGOfProjects {
         ArrayList<File> files = Utils.getPythonFiles(Objects.requireNonNull(dir.listFiles()));
         for (File file : files) {
             System.out.println(file.getAbsolutePath());
-            ConcreatePythonParser parser = new ConcreatePythonParser();
+            ConcreteJavaParser parser = new ConcreteJavaParser();
             Module parse = parser.parse(file.getAbsolutePath());
             List<stmt> collect = parse.getInternalBody().stream().filter(x -> x instanceof Import
                     || x instanceof ImportFrom).collect(Collectors.toList());
@@ -83,7 +80,7 @@ public class TestPDGOfProjects {
         ArrayList<File> files = Utils.getPythonFiles(Objects.requireNonNull(dir.listFiles()));
         for (File file : files) {
             System.out.println(file.getAbsolutePath());
-            ConcreatePythonParser parser = new ConcreatePythonParser();
+            ConcreteJavaParser parser = new ConcreteJavaParser();
             Module parse = parser.parse(file.getAbsolutePath());
             List<stmt> collect = parse.getInternalBody().stream().filter(x -> x instanceof Import
                     || x instanceof ImportFrom).collect(Collectors.toList());

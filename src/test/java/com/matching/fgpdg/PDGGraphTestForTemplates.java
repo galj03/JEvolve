@@ -1,6 +1,6 @@
 package com.matching.fgpdg;
 
-import com.matching.ConcreatePythonParser;
+import com.matching.ConcreteJavaParser;
 import com.matching.fgpdg.nodes.Guards;
 import com.matching.fgpdg.nodes.TypeInfo.TypeWrapper;
 import com.utils.DotGraph;
@@ -19,7 +19,7 @@ public class PDGGraphTestForTemplates {
     }
     @Test
     void testPDG2() throws Exception {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         String code =   "# type :[[l1]] : int\n" +
                 "# type :[[l2]] : int\n" +
                 "# type :[[l3]] : int[]\n" +
@@ -41,7 +41,7 @@ public class PDGGraphTestForTemplates {
 
     @Test
     void testPDG3() throws Exception {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         String code = """
                 # import :[[l4]] : numpy
                 import numpy as np
@@ -67,7 +67,7 @@ public class PDGGraphTestForTemplates {
 
     @Test
     void testPDG4() throws Exception {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         String code = """
                 with :[l3] as :[[l1]]:
                     :[[l13]] = :[[l16]].:[[l18]](:[[l1]], :[l21])""";
@@ -85,7 +85,7 @@ public class PDGGraphTestForTemplates {
 
     @Test
     void testPDG5() throws Exception {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         String code = """
                 # type :[[l1]] : int[]\n 
                 mean = sum(:[[l1]])/len(:[[l1]])""";
@@ -103,7 +103,7 @@ public class PDGGraphTestForTemplates {
 
     @Test
     void testPDG6() throws Exception {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         String code = """ 
                 # import :[[l1]] : numpy\n
                 :[[l1]].dot(:[[l1]].dot(:[[l2]], :[[l3]]), :[[l4]]))""";
@@ -122,7 +122,7 @@ public class PDGGraphTestForTemplates {
 
     @Test
     void testPDG7() throws Exception {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         String code = """
                 # type :[[l1]] : bool
                 :[[l1]] = False

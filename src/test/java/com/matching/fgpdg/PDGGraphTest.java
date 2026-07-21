@@ -1,6 +1,6 @@
 package com.matching.fgpdg;
 
-import com.matching.ConcreatePythonParser;
+import com.matching.ConcreteJavaParser;
 import com.utils.DotGraph;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 class PDGGraphTest {
     @Test
     void testPattern() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/pattern.py");
         PDGBuildingContext context = null;
         try {
@@ -36,7 +36,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG1() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test1.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
         PDGBuildingContext context = null;
@@ -59,7 +59,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG2() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test2.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -82,7 +82,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG3() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test3.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -105,7 +105,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG4() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test4.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -128,7 +128,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG5() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test5.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -151,7 +151,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG6() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test6.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -174,7 +174,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG7() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test7.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -197,7 +197,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG8() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test8.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -220,7 +220,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG9() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test9.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -243,7 +243,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG10() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test10.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -266,7 +266,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG11() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test11.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -289,7 +289,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG12() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test12.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -312,7 +312,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG13() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test13.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -335,7 +335,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG14() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test14.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -358,7 +358,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG15() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test15.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -381,7 +381,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG16() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test16.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -404,7 +404,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG17() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test17.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -427,7 +427,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG18() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test18.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -450,7 +450,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG19() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test19.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -473,7 +473,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG20() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test20.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -496,7 +496,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG21() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test21.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
         PDGBuildingContext context = null;
@@ -519,7 +519,7 @@ class PDGGraphTest {
 
     @Test
     void testPDGm2() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/testm2.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
         PDGBuildingContext context = null;
@@ -542,7 +542,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG23() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test22.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
         PDGBuildingContext context = null;
@@ -564,7 +564,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG24() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test23.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
         PDGBuildingContext context = null;
@@ -586,7 +586,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG25() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test26.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
         PDGBuildingContext context = null;
@@ -608,7 +608,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG26() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test27.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
         PDGBuildingContext context = null;
@@ -630,7 +630,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG27() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test28.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
         PDGBuildingContext context = null;
@@ -652,7 +652,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG28() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test29.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
         PDGBuildingContext context = null;
@@ -674,7 +674,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG29() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test30.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
         PDGBuildingContext context = null;
@@ -696,7 +696,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG30() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test31.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
         PDGBuildingContext context = null;
@@ -719,7 +719,7 @@ class PDGGraphTest {
 
     @Test
     void testPDG31() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test32.py");
         FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
         PDGBuildingContext context = null;
@@ -741,7 +741,7 @@ class PDGGraphTest {
 
     @Test
     void testParse() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test24.py");
         System.out.println(parse);
     }

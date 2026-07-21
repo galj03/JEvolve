@@ -1,6 +1,5 @@
-package com.utils;
+package com.visitors;
 
-import com.visitors.ASTBaseVisitor;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
@@ -22,5 +21,9 @@ public class MethodDeclarationVisitor extends ASTBaseVisitor {
     @Override
     public void postVisit(ASTNode node) {
 
+    }
+
+    public ArrayList<MethodDeclaration> getMethodDeclarations(){
+        return methodDeclarations;
     }
 }

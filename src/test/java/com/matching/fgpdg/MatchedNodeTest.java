@@ -1,11 +1,7 @@
 package com.matching.fgpdg;
 
-import com.matching.ConcreatePythonParser;
 import com.matching.fgpdg.nodes.*;
-import com.matching.fgpdg.nodes.TypeInfo.TypeWrapper;
 import com.utils.DotGraph;
-import com.utils.FileIO;
-import org.inferrules.Utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.python.antlr.Visitor;

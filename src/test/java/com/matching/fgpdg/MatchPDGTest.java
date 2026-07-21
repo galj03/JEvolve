@@ -1,6 +1,6 @@
 package com.matching.fgpdg;
 
-import com.matching.ConcreatePythonParser;
+import com.matching.ConcreteJavaParser;
 import com.utils.Utils;
 import org.junit.jupiter.api.Test;
 import org.python.antlr.ast.FunctionDef;
@@ -36,7 +36,7 @@ class MatchPDGTest {
     }
 
     private Module getPythonModule(String fileName){
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         return parser.parse(fileName);
 //        FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
 //        PDGBuildingContext context = new PDGBuildingContext(new ArrayList<>(),"");

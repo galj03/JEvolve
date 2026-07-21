@@ -5,7 +5,6 @@ import com.adaptrule.Rule;
 import com.inferrules.comby.jsonResponse.CombyRewrite;
 import com.inferrules.comby.operations.BasicCombyOperations;
 import com.inferrules.core.RewriteRule;
-import com.inferrules.core.languageAdapters.Language;
 import com.matching.fgpdg.*;
 import com.matching.fgpdg.nodes.Guards;
 import com.matching.fgpdg.nodes.TypeInfo.TypeWrapper;
@@ -23,7 +22,6 @@ import org.python.antlr.base.stmt;
 import org.python.core.PyObject;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -226,7 +224,7 @@ public class MainAdaptor {
 
     public static String transplantPatternToFile(String filename, String LHS, String RHS, boolean replaceFile) {
         BasicCombyOperations op = new BasicCombyOperations();
-        CompilationUnit codeModule = Utils.getPythonModule(Configurations.PROJECT_REPOSITORY + filename); //JavaASTUtil?
+        CompilationUnit codeModule = Utils.getCompilationUnit(Configurations.PROJECT_REPOSITORY + filename); //JavaASTUtil?
         String sourceCode = FileIO.readFile(Configurations.PROJECT_REPOSITORY + filename);
         List<ImportDeclaration> imports = codeModule.imports();
         String adaptedFunction = "";
@@ -267,8 +265,8 @@ public class MainAdaptor {
     public static String transplantPatternToFunction(String filename, MethodDeclaration def, List<ImportDeclaration> imports, String LHS, String RHS, String codeInFile) {
         BasicCombyOperations op = new BasicCombyOperations();
         String code = def.toString(); //TODO: test if this is the actual code
-        CompilationUnit lpatternModule = Utils.getPythonModuleForTemplate(LHS).onFailure(System.err::println).get();
-        CompilationUnit rpatternModule = Utils.getPythonModuleForTemplate(RHS).onFailure(System.err::println).get();
+        CompilationUnit lpatternModule = Utils.getCompilationUnitForTemplate(LHS).onFailure(System.err::println).get();
+        CompilationUnit rpatternModule = Utils.getCompilationUnitForTemplate(RHS).onFailure(System.err::println).get();
 
         List<MatchedNode> matchedNodes = getMatchedNodes(filename, LHS, def, imports, lpatternModule);
         List<MatchedNode> allMatchedGraphs = matchedNodes.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());

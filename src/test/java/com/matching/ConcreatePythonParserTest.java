@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ConcreatePythonParserTest {
     @Test
     void parse() {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse("author/project/test1.py");
         System.out.println(parse.toStringTree());
 
@@ -24,7 +24,7 @@ class ConcreatePythonParserTest {
     void parseCode() {
         String code = "import numpy as np \nx=True";
         InputStream codeStream = new ByteArrayInputStream(code.getBytes());
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module parse = parser.parse(codeStream);
         assertEquals(2,parse.getChildCount());
     }

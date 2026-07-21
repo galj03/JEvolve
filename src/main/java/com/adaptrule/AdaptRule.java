@@ -1,15 +1,10 @@
 package com.adaptrule;
 
 import com.matching.fgpdg.MatchedNode;
-import com.matching.fgpdg.nodes.Guards;
 import com.matching.fgpdg.nodes.PDGNode;
 import com.utils.JavaASTUtil;
-import com.utils.MethodDeclarationVisitor;
-import com.utils.Utils;
 import org.eclipse.jdt.core.dom.*;
-import org.python.antlr.PythonTree;
 import org.python.antlr.ast.*;
-import org.python.antlr.ast.Module;
 import org.python.antlr.base.stmt;
 
 import java.util.ArrayList;
@@ -22,7 +17,7 @@ public class AdaptRule {
     MatchedNode graph;
     MethodDeclaration targetCodeAST;
     CompilationUnit rhsAST;
-    Map<PythonTree, Hole> nameToHole;
+    Map<ASTNode, Hole> nameToHole;
     public AdaptRule(MatchedNode graph, MethodDeclaration targetCodeAST, CompilationUnit rpatternModule) {
         this.graph = graph;
         this.targetCodeAST = targetCodeAST;
@@ -47,17 +42,6 @@ public class AdaptRule {
         return rule;
     }
 
-    //TODO: remove?
-    public MethodDeclaration getFunctionDef(CompilationUnit md){
-        return Utils.getAllFunctions(md).get(0);
-//        md.accept(new MethodDeclarationVisitor());
-//        for (BodyDeclaration stmt : md.getInternalBody()) {
-//            if (stmt instanceof MethodDeclaration)
-//                return (MethodDeclaration)stmt;
-//        }
-//        return null;
-    }
-
     private MethodDeclaration createRHS(MethodDeclaration lhs, CompilationUnit rhs, List<ASTNode> matchedNode) {
         FindDeletesFromLHS deletes = new FindDeletesFromLHS(matchedNode);
         try {
@@ -67,7 +51,7 @@ public class AdaptRule {
                 if (deletes.finalDeletedNode.equals(updateTree))
                     break;
                 else{
-                    if (updateTree instanceof Call && updateTree.getParent()!=null
+                    if (updateTree instanceof MethodInvocation && updateTree.getParent()!=null //TODO: another method+expr...
                             && updateTree.getParent() instanceof Expression){
                         deletes.finalDeletedNode=updateTree.getParent();
                     }
@@ -85,7 +69,7 @@ public class AdaptRule {
 //                    }
 //                }
 //            }
-            DeleteAndUpdateVisitor updator = new DeleteAndUpdateVisitor(deletes.deletes,deletes.finalDeletedNode,rhs);
+            DeleteAndUpdateVisitor updator = new DeleteAndUpdateVisitor(deletes.deletes, deletes.finalDeletedNode, rhs);
             updator.visit(lhs);
         } catch (Exception e) {
             e.printStackTrace();
@@ -150,7 +134,7 @@ public class AdaptRule {
     }
 
     private MethodDeclaration renameRestOfTheRenamedVarsWithHoles(MethodDeclaration targetCode){
-        Map<ASTNode, List<ASTNode>> codeAndParaNode = new HashMap<>();
+//        Map<ASTNode, List<ASTNode>> codeAndParaNode = new HashMap<>();
         CollectChangedNames changedNames = new CollectChangedNames(nameToHole.keySet());
         try {
             Map<ASTNode, List<ASTNode>> nodeAndHoleToRename = new HashMap<>();

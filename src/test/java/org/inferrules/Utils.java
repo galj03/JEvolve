@@ -3,27 +3,19 @@ package org.inferrules;
 import com.google.common.collect.Streams;
 import com.google.gson.Gson;
 import com.inferrules.comby.jsonResponse.CombyMatch;
-import com.inferrules.core.Template;
 import com.inferrules.utils.Utilities;
-import com.matching.ConcreatePythonParser;
+import com.matching.ConcreteJavaParser;
 import com.matching.fgpdg.*;
 import com.matching.fgpdg.nodes.Guards;
 import com.matching.fgpdg.nodes.TypeInfo.TypeWrapper;
 import com.utils.FileIO;
 import io.vavr.Tuple;
-import io.vavr.Tuple2;
-import io.vavr.control.Try;
 import org.python.antlr.Visitor;
 import org.python.antlr.ast.*;
 import org.python.antlr.ast.Module;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.List;
@@ -149,12 +141,12 @@ public class Utils {
     }
 
     public static Module getPythonModule(String fileName){
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         return parser.parse(fileName);
     }
 
     public static Module getPythonModuleForTemplate(String fileName) throws Exception {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         return parser.parseTemplates(FileIO.readStringFromFile(fileName));
     }
 

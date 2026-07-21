@@ -1,26 +1,18 @@
 package com.utils;
 
 import com.LanguageConfigurations;
-import com.matching.ConcreatePythonParser;
+import com.matching.ConcreteJavaParser;
 import com.matching.fgpdg.*;
-import com.matching.fgpdg.nodes.Guards;
 import com.matching.fgpdg.nodes.PDGActionNode;
 import com.matching.fgpdg.nodes.PDGDataNode;
 import com.matching.fgpdg.nodes.PDGNode;
-import com.matching.fgpdg.nodes.TypeInfo.TypeWrapper;
 import com.visitors.ASTBaseVisitor;
+import com.visitors.MethodDeclarationVisitor;
 import io.vavr.control.Try;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.python.antlr.PythonTree;
-import org.python.antlr.Visitor;
+import org.eclipse.jdt.core.dom.*;
 import org.python.antlr.ast.*;
-import org.python.antlr.base.expr;
 import org.python.antlr.base.stmt;
-import org.python.core.PyObject;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,6 +23,7 @@ import java.util.stream.Collectors;
 public class Utils {
     private static int thresholdForIterations = 10;
 
+    //TODO: why isn't def used????
     public static List<ASTNode> getMatchedASTSubGraph(MatchedNode matchedNode, MethodDeclaration def) {
         List<ASTNode> codeNodes = matchedNode.getAllMatchedNodes().stream().map(d->d.getCodeNode().getAstNode()).collect(Collectors.toList());
         List<ASTNode> withoutChildNodes = new ArrayList<>(getNonSubTreeASTNodes(codeNodes));
@@ -84,16 +77,17 @@ public class Utils {
         return newNodeList;
     }
 
-    //TODO
     private static boolean doesEveryNodeHaveTheSameParent(List<ASTNode> nodes){
         Set<ASTNode> parents = new HashSet<>();
         for (ASTNode node : nodes) {
-            PythonTree n = (PythonTree)node;
-            if (node instanceof Call && ((Call) node).getParent()!=null && ((Call) node).getParent() instanceof Expr){
-                parents.add(((Call) node).getParent().getParent());
+//            ASTNode n = (PythonTree)node;
+            //MethodInvocation was 'Call' before
+            //TODO: does MethodInvocation need this double parenting??? - test it!
+            if (node instanceof MethodInvocation && node.getParent()!=null && node.getParent() instanceof Expression){
+                parents.add(node.getParent().getParent());
             }
-            else if (n.getParent()!=null){
-                parents.add(((PythonTree) node).getParent());
+            else if (node.getParent()!=null){
+                parents.add(node.getParent());
             }
         }
 
@@ -102,7 +96,7 @@ public class Utils {
 
     private static List<ASTNode> getNonSubTreeASTNodes(List<ASTNode> codeNodes) {
         List<List<ASTNode>> permutations = codeNodes.stream().map(e1 -> codeNodes.stream().filter(e2 -> e2 != e1).
-                map(e3 -> Arrays.asList(e1, e3)).collect(Collectors.toList())).flatMap(List::stream).collect(Collectors.toList());
+                map(e3 -> Arrays.asList(e1, e3)).collect(Collectors.toList())).flatMap(List::stream).toList();
         List<ASTNode> parentNodes = new ArrayList<>();
         for (List<ASTNode> objects : permutations) {
             if (objects.get(0)!=null && objects.get(1)!=null && Utils.isChildNode(objects.get(0),objects.get(1))){
@@ -120,9 +114,9 @@ public class Utils {
             }
         }
         List<ASTNode> updatedParentNodes = new ArrayList<>();
-        for (ASTNode node : parentNodes) { //TODO: think about this
-            if (node instanceof Call && ((Call) node).getParent() instanceof Expr){
-                updatedParentNodes.add(((Call) node).getParent());
+        for (ASTNode node : parentNodes) {
+            if (node instanceof MethodInvocation && node.getParent() instanceof Expression){ //TODO: test
+                updatedParentNodes.add(node.getParent());
             }
             else
                 updatedParentNodes.add(node);
@@ -141,7 +135,7 @@ public class Utils {
             if (!parentNodes.contains(objects.get(i)))
                 parentNodes.add(objects.get(i));
         }
-        parentNodes.remove(objects.get(0));
+        parentNodes.remove(objects.getFirst());
     }
 
     public static boolean isChildNode(ASTNode childNode, ASTNode parentNode){
@@ -156,7 +150,7 @@ public class Utils {
     }
 
     public static void markNodesInCode(String code, List<MatchedNode> pdgs,String fileName, String stylefile,String link) {
-        if(new File(code).exists())
+        if(new File(code).exists()) //TODO: fileName instead??
         {
             String finalCode = code;
             code = Try.of(() -> getFileContent(finalCode)).onFailure(System.err::println).get();
@@ -166,28 +160,26 @@ public class Utils {
         for (MatchedNode pdg : pdgs) {
             for (PDGNode node : pdg.getCodePDGNodes()) {
                 if (node.getAstNode()!=null && (node instanceof PDGDataNode || node instanceof PDGActionNode)){
-                    if (node.getAstNode() instanceof expr){
-                        duration.add(new Interval(((expr)node.getAstNode()).getCharStartIndex(),((expr)node.getAstNode()).getCharStopIndex()));
+                    switch (node.getAstNode()) {
+                        case Expression expression ->
+                                duration.add(new Interval(expression.getCharStartIndex(), expression.getCharStopIndex()));
+                        case Statement stmt -> {
+                            System.out.println(stmt.getClass());
+                            duration.add(new Interval(stmt.getCharStartIndex(), stmt.getCharStopIndex()));
+                        }
+                        case Assignment assign ->
+                                duration.add(new Interval(assign.getCharStartIndex(), assign.getCharStopIndex()));
+                        case org.python.antlr.ast.arg arg ->
+                                duration.add(new Interval(arg.getCharStartIndex(), arg.getCharStopIndex()));
+                        case null, default -> Assertions.UNREACHABLE();
                     }
-                    else if (node.getAstNode() instanceof stmt){
-                        System.out.println(node.getAstNode().getClass());
-                        duration.add(new Interval(((stmt)node.getAstNode()).getCharStartIndex(),((stmt)node.getAstNode()).getCharStopIndex()));
-                    }
-                    else if (node.getAstNode() instanceof org.python.antlr.ast.Assign){
-                        duration.add(new Interval(((Assign)node.getAstNode()).getCharStartIndex(),((stmt)node.getAstNode()).getCharStopIndex()));
-                    }
-                    else if (node.getAstNode() instanceof org.python.antlr.ast.arg){
-                        duration.add(new Interval(((org.python.antlr.ast.arg)node.getAstNode()).getCharStartIndex(),((org.python.antlr.ast.arg)node.getAstNode()).getCharStopIndex()));
-                    }
-                    else
-                        Assertions.UNREACHABLE();
                 }
             }
         }
-        writeMatchCodeToHTML(code, fileName, duration,stylefile,link);
+        writeMatchCodeToHTML(code, fileName, duration, stylefile, link);
     }
 
-        private static void writeMatchCodeToHTML(String code, String fileName, List<Interval> duration, String styleFile,String githubLink) {
+    private static void writeMatchCodeToHTML(String code, String fileName, List<Interval> duration, String styleFile, String githubLink) {
         String s = "\n<a href=\""+githubLink.split("@")[0] +"\">GitHubLink</a>"+"\n\n"+
                 "\n<a href=\""+githubLink.split("@")[1] +"\">GitMyHubLink</a>"+"\n\n"+
                 markupCode(duration.stream().map(x -> {
@@ -364,8 +356,8 @@ public class Utils {
     }
 
     //TODO: rename
-    public static CompilationUnit getPythonModule(String fileName){
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+    public static CompilationUnit getCompilationUnit(String fileName){
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         return parser.parse(fileName);
     }
 
@@ -373,101 +365,100 @@ public class Utils {
         MethodDeclarationVisitor fu = new MethodDeclarationVisitor();
         try {
             fu.visit(ast);
-            return fu.methodDeclarations;
+            return fu.getMethodDeclarations();
         } catch (Exception e) {
             return new ArrayList<>();
         }
     }
 
-    //TODO: comment it out??
-    public static void searchProjectForPatterns(String projectPath, String pattern, String outputPath) throws Exception {
-        File dir = new File(projectPath);
-        if (dir.listFiles()==null){
-            System.out.println("empty directory");
-            return;
-        }
-        ConcreatePythonParser parser = new ConcreatePythonParser();
-        Module patternModule = parser.parseTemplates(pattern);
-        ArrayList<File> files =  getCodeFiles(Objects.requireNonNull(dir.listFiles()));
-        Guards guards = new Guards(pattern,patternModule);
-        TypeWrapper wrapper = new TypeWrapper(guards);
-        PDGBuildingContext patternContext = new PDGBuildingContext(patternModule.getInternalBody().stream().filter(x -> x instanceof Import
-                || x instanceof ImportFrom).collect(Collectors.toList()),wrapper);
-        PDGGraph ppdg = new PDGGraph(patternModule,patternContext);
+//    public static void searchProjectForPatterns(String projectPath, String pattern, String outputPath) throws Exception {
+//        File dir = new File(projectPath);
+//        if (dir.listFiles()==null){
+//            System.out.println("empty directory");
+//            return;
+//        }
+//        ConcreatePythonParser parser = new ConcreatePythonParser();
+//        Module patternModule = parser.parseTemplates(pattern);
+//        ArrayList<File> files =  getCodeFiles(Objects.requireNonNull(dir.listFiles()));
+//        Guards guards = new Guards(pattern,patternModule);
+//        TypeWrapper wrapper = new TypeWrapper(guards);
+//        PDGBuildingContext patternContext = new PDGBuildingContext(patternModule.getInternalBody().stream().filter(x -> x instanceof Import
+//                || x instanceof ImportFrom).collect(Collectors.toList()),wrapper);
+//        PDGGraph ppdg = new PDGGraph(patternModule,patternContext);
+//
+//        DotGraph pdg1 = new DotGraph(ppdg);
+//        pdg1.toDotFile(new File(outputPath  +"____pattern_code__file___"+".dot"));
+//        String projectName = new File(Configurations.PROJECT_REPOSITORY).toURI().
+//                relativize(new File(projectPath).toURI()).getPath();
+//        String gitHubProjectName =  "https://github.com/"+projectName+"blob/"+GitUtils.getBranch(GitUtils.connect(projectPath))+"/";
+//        String gitHubMyProjectName =  "https://github.com/"+projectName.split("/")[1] +"/blob/"+GitUtils.getBranch(GitUtils.connect(projectPath))+"/";
+//
+//        for (File file : files) {
+//            System.out.println("Processing "+file.getAbsolutePath());
+//            String gitHubFilePath = gitHubProjectName+new File(Configurations.PROJECT_REPOSITORY+"/"+projectName).toURI().
+//                    relativize(new File(file.toURI()).toURI()).getPath();
+//            Module parse = getPythonModule (file.getAbsolutePath());
+//            if (parse!=null){
+//                List<stmt> codeImports = parse.getInternalBody().stream().filter(x -> x instanceof Import
+//                        || x instanceof ImportFrom).collect(Collectors.toList());
+//                ArrayList<FunctionDef> functions = getAllFunctions(parse);
+////            if (file.getAbsolutePath().equals("/Users/malinda/Documents/Research3/PROJECT_REPO/keras-team/keras/keras/datasets/mnist.py")) {
+//                int num = 0;
+//                if (functions.size()>0) {
+//                    for (FunctionDef function : functions) {
+//                        System.out.println("Function: " + function.getInternalName());
+//                        try {
+//                            String gitHubLocation= gitHubFilePath+"#L"+function.getLineno();
+//                            String gitHubMyLocation = gitHubMyProjectName+new File(Configurations.PROJECT_REPOSITORY+"/"+projectName).toURI().
+//                                    relativize(new File(file.toURI()).toURI()).getPath()+"#L"+function.getLineno();
+//                            String relative = new File(Configurations.PROJECT_REPOSITORY).toURI().relativize(new File(file.getAbsolutePath()).toURI()).getPath();
+//                            PDGBuildingContext cContext = new PDGBuildingContext(codeImports, relative);
+//                            System.out.println(function.getInternalName());
+//                            PDGGraph pdg = new PDGGraph(function, cContext);
+//                            DotGraph dg = new DotGraph(pdg);
+//                            dg.toDotFile(new File(outputPath+ "____code__file___" + ".dot"));
+//                            MatchPDG match = new MatchPDG();
+//                            List<MatchedNode> graphs = match.getSubGraphs(ppdg, pdg, patternContext, cContext);
+//                            if (graphs != null) {
+//                                graphs.forEach(x -> x.updateAllMatchedNodes(x, ppdg));
+//                                if (graphs.stream().anyMatch(MatchedNode::isAllChildsMatched)) {
+//                                    String paterntName = "";
+//                                    if (function.getParent() != null && function.getParent() instanceof FunctionDef)
+//                                        paterntName = ((FunctionDef) function.getParent()).getInternalName();
+//                                    else if (function.getParent() != null && function.getParent() instanceof ClassDef)
+//                                        paterntName = ((ClassDef) function.getParent()).getInternalName();
+//                                    String fileName = paterntName + "____" + function.getInternalName();
+//                                    File f = new File(outputPath+"matches/" + relative.substring(0, relative.length() - 3) + "____" + fileName + ".html");
+//                                    if(f.exists() && !f.isDirectory()) {
+//                                        fileName = paterntName + "____" + function.getInternalName()+"____" + num;
+//                                    }
+//                                    com.utils.Utils.markNodesInCode(file.getAbsolutePath(), graphs,
+//                                            outputPath+"matches/" + relative.substring(0, relative.length() - 3) + "____" + fileName + ".html",
+//                                            Arrays.stream(relative.split("/")).map(x -> "../").skip(1).collect(Collectors.joining()),gitHubLocation+"@"+gitHubMyLocation);
+//                                    match.drawMatchedGraphs(pdg, graphs, outputPath+"matches/" + relative.substring(0, relative.length() - 3) + "____" + fileName + ".dot");
+//                                    graphs.forEach(x -> x.updateAllMatchedNodes(x, ppdg));
+//                                    num += 1;
+//                                }
+//                            }
+////                    match.drawMatchedGraphs(fpdg,graphs,"OUTPUT/matches/text1.dot");
+////                        if (graphs != null && graphs.stream().anyMatch(MatchedNode::isAllChildsMatched))
+//                        } catch (IOException e) {
+//                            System.out.println("Type File is Not available");
+//                        }
+//                    }
+//                }
+//                else {
+//                    System.out.println("No functions");
+//                }
+//            }
+//        }
+//    }
 
-        DotGraph pdg1 = new DotGraph(ppdg);
-        pdg1.toDotFile(new File(outputPath  +"____pattern_code__file___"+".dot"));
-        String projectName = new File(Configurations.PROJECT_REPOSITORY).toURI().
-                relativize(new File(projectPath).toURI()).getPath();
-        String gitHubProjectName =  "https://github.com/"+projectName+"blob/"+GitUtils.getBranch(GitUtils.connect(projectPath))+"/";
-        String gitHubMyProjectName =  "https://github.com/"+projectName.split("/")[1] +"/blob/"+GitUtils.getBranch(GitUtils.connect(projectPath))+"/";
-
-        for (File file : files) {
-            System.out.println("Processing "+file.getAbsolutePath());
-            String gitHubFilePath = gitHubProjectName+new File(Configurations.PROJECT_REPOSITORY+"/"+projectName).toURI().
-                    relativize(new File(file.toURI()).toURI()).getPath();
-            Module parse = getPythonModule (file.getAbsolutePath());
-            if (parse!=null){
-                List<stmt> codeImports = parse.getInternalBody().stream().filter(x -> x instanceof Import
-                        || x instanceof ImportFrom).collect(Collectors.toList());
-                ArrayList<FunctionDef> functions = getAllFunctions(parse);
-//            if (file.getAbsolutePath().equals("/Users/malinda/Documents/Research3/PROJECT_REPO/keras-team/keras/keras/datasets/mnist.py")) {
-                int num = 0;
-                if (functions.size()>0) {
-                    for (FunctionDef function : functions) {
-                        System.out.println("Function: " + function.getInternalName());
-                        try {
-                            String gitHubLocation= gitHubFilePath+"#L"+function.getLineno();
-                            String gitHubMyLocation = gitHubMyProjectName+new File(Configurations.PROJECT_REPOSITORY+"/"+projectName).toURI().
-                                    relativize(new File(file.toURI()).toURI()).getPath()+"#L"+function.getLineno();
-                            String relative = new File(Configurations.PROJECT_REPOSITORY).toURI().relativize(new File(file.getAbsolutePath()).toURI()).getPath();
-                            PDGBuildingContext cContext = new PDGBuildingContext(codeImports, relative);
-                            System.out.println(function.getInternalName());
-                            PDGGraph pdg = new PDGGraph(function, cContext);
-                            DotGraph dg = new DotGraph(pdg);
-                            dg.toDotFile(new File(outputPath+ "____code__file___" + ".dot"));
-                            MatchPDG match = new MatchPDG();
-                            List<MatchedNode> graphs = match.getSubGraphs(ppdg, pdg, patternContext, cContext);
-                            if (graphs != null) {
-                                graphs.forEach(x -> x.updateAllMatchedNodes(x, ppdg));
-                                if (graphs.stream().anyMatch(MatchedNode::isAllChildsMatched)) {
-                                    String paterntName = "";
-                                    if (function.getParent() != null && function.getParent() instanceof FunctionDef)
-                                        paterntName = ((FunctionDef) function.getParent()).getInternalName();
-                                    else if (function.getParent() != null && function.getParent() instanceof ClassDef)
-                                        paterntName = ((ClassDef) function.getParent()).getInternalName();
-                                    String fileName = paterntName + "____" + function.getInternalName();
-                                    File f = new File(outputPath+"matches/" + relative.substring(0, relative.length() - 3) + "____" + fileName + ".html");
-                                    if(f.exists() && !f.isDirectory()) {
-                                        fileName = paterntName + "____" + function.getInternalName()+"____" + num;
-                                    }
-                                    com.utils.Utils.markNodesInCode(file.getAbsolutePath(), graphs,
-                                            outputPath+"matches/" + relative.substring(0, relative.length() - 3) + "____" + fileName + ".html",
-                                            Arrays.stream(relative.split("/")).map(x -> "../").skip(1).collect(Collectors.joining()),gitHubLocation+"@"+gitHubMyLocation);
-                                    match.drawMatchedGraphs(pdg, graphs, outputPath+"matches/" + relative.substring(0, relative.length() - 3) + "____" + fileName + ".dot");
-                                    graphs.forEach(x -> x.updateAllMatchedNodes(x, ppdg));
-                                    num += 1;
-                                }
-                            }
-//                    match.drawMatchedGraphs(fpdg,graphs,"OUTPUT/matches/text1.dot");
-//                        if (graphs != null && graphs.stream().anyMatch(MatchedNode::isAllChildsMatched))
-                        } catch (IOException e) {
-                            System.out.println("Type File is Not available");
-                        }
-                    }
-                }
-                else {
-                    System.out.println("No functions");
-                }
-            }
-        }
-    }
-
-    //TODO: rename methods
-    public static Try<CompilationUnit> getPythonModuleForTemplate(String fileName) {
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+    public static Try<CompilationUnit> getCompilationUnitForTemplate(String fileName) {
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         return Try.of(()->parser.parseTemplates(FileIO.readStringFromFile(fileName)));
     }
+    //TODO: rename methods
 
     public static List<ASTNode> getContinousStatments(List<ASTNode> subtree) {
         int start = subtree.stream().map(x -> (ASTNode) x).map(ASTNode::getCharStartIndex).min(Integer::compare).get();

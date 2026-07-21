@@ -38,7 +38,7 @@ public class AnalyzingJavaParser {
 
         // Configure for error collection (key difference from standard parsing)
         Map<String, String> options = JavaCore.getDefaultOptions();
-//        options.put(JavaCore.COMPILER_PROBLEMS_SEVERITY, JavaCore.WARNING);
+//        options.put(JavaCore.COMPILER_PROBLEMS_SEVERITY, JavaCore.WARNING); //in theory, this will be done automatically
         parser.setCompilerOptions(options);
 
         // Parse and extract AST

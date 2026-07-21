@@ -1,12 +1,7 @@
 package com;
 
-import com.inferrules.core.RewriteRule;
-import com.inferrules.core.languageAdapters.Language;
-import com.matching.ConcreatePythonParser;
 import com.matching.fgpdg.Configurations;
-import com.matching.fgpdg.nodes.Guards;
 import com.utils.FileIO;
-import org.inferrules.Utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,12 +12,9 @@ import org.python.antlr.ast.Module;
 import org.python.antlr.base.stmt;
 
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import static org.inferrules.Utils.*;
 import static org.inferrules.Utils.getPathToResources;
-import static org.junit.jupiter.api.Assertions.*;
 
 class MainAdaptorTest {
     @BeforeEach
@@ -75,7 +67,7 @@ class MainAdaptorTest {
         String LHS = "/Users/malinda/Documents/Research3/InferRules/src/test/resources/author/project/pattern12.py";
         String RHS = "/Users/malinda/Documents/Research3/InferRules/src/test/resources/author/project/r_pattern12.py";
 
-        Module codeModule = com.utils.Utils.getPythonModule(projectFile);
+        Module codeModule = com.utils.Utils.getCompilationUnit(projectFile);
         stmt stmt = codeModule.getInternalBody().get(1);
         List<org.python.antlr.base.stmt> imports = codeModule.getInternalBody().stream().filter(x -> x instanceof Import
                 || x instanceof ImportFrom).collect(Collectors.toList());

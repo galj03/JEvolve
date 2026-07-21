@@ -1,6 +1,6 @@
 package com.matching.fgpdg;
 
-import com.matching.ConcreatePythonParser;
+import com.matching.ConcreteJavaParser;
 import com.matching.fgpdg.nodes.ast.AlphanumericHole;
 import com.matching.fgpdg.nodes.ast.LazyHole;
 import org.junit.jupiter.api.Assertions;
@@ -21,7 +21,7 @@ public class TestTemplatParsing {
                 "    if (:[[l7]]):\n" +
                 "        xx.ccc.fff()\n" +
                 "        :[[l8]].:[[l7]].:[[l6]](2*:[[l9]])";
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module module = parser.parseTemplates(code);
         HoleCounter count = new HoleCounter();
         count.visit(module);
@@ -34,7 +34,7 @@ public class TestTemplatParsing {
                 "\n" +
                 "while (:[[l17]]):\n" +
                 "    :[[l19]]";
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module module = parser.parseTemplates(code);
         HoleCounter count = new HoleCounter();
         count.visit(module);
@@ -56,7 +56,7 @@ public class TestTemplatParsing {
                 "    print(\"result is\")\n" +
                 "finally:\n" +
                 "    print(\"executing finally clause\")";
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module module = parser.parseTemplates(code);
         HoleCounter count = new HoleCounter();
         count.visit(module);
@@ -69,7 +69,7 @@ public class TestTemplatParsing {
                 "{'one':3,:[[l56]]::[[l57]],:[[l58]]::[[l59]]}\n" +
                 "\n" +
                 "{ 3,:[[l56]],:[[l57]],:[[l58]],:[[l59]]}";
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module module = parser.parseTemplates(code);
         HoleCounter count = new HoleCounter();
         count.visit(module);
@@ -79,7 +79,7 @@ public class TestTemplatParsing {
     @Test
     void testTemplate5() throws Exception {
         String code = "{:[[l1]]::[[l2]] for :[[l3]] in iterable if :[[l5]]}";
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module module = parser.parseTemplates(code);
         HoleCounter count = new HoleCounter();
         count.visit(module);
@@ -89,7 +89,7 @@ public class TestTemplatParsing {
     @Test
     void testTemplate6() throws Exception {
         String code = "{:[[l1]] for :[[l3]] in iterable if :[[l5]]}";
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module module = parser.parseTemplates(code);
         HoleCounter count = new HoleCounter();
         count.visit(module);
@@ -99,7 +99,7 @@ public class TestTemplatParsing {
     @Test
     void testTemplate7() throws Exception {
         String code = "(:[[l1]] for :[[l3]] in iterable if :[[l5]])";
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module module = parser.parseTemplates(code);
         HoleCounter count = new HoleCounter();
         count.visit(module);
@@ -120,7 +120,7 @@ public class TestTemplatParsing {
                 "        else:\n" +
                 "            x = letters.:[[l6]](letter) + shift\n" +
                 "            encoded = encoded + :[[l7]][x]";
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module module = parser.parseTemplates(code);
         HoleCounter count = new HoleCounter();
         count.visit(module);
@@ -136,7 +136,7 @@ public class TestTemplatParsing {
                 "        else:\n" +
                 "            x = letters.index(:[[l4]]) - shift\n" +
                 "            encoded = :[[l5]] + letters[x]";
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module module = parser.parseTemplates(code);
         HoleCounter count = new HoleCounter();
         count.visit(module);
@@ -150,7 +150,7 @@ public class TestTemplatParsing {
                 "   print(\"{0} is Even\".format(num))\n" +
                 "else:\n" +
                 "   print(\"{0} is Odd\".format(num))";
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module module = parser.parseTemplates(code);
         HoleCounter count = new HoleCounter();
         count.visit(module);
@@ -161,7 +161,7 @@ public class TestTemplatParsing {
     void testTemplate11() throws Exception {
         String code = "for i in range(1, :[[l3]]):\n" +
                 "   print(num, 'x', i, '=', :[[l1]]*:[[l2]])";
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module module = parser.parseTemplates(code);
         HoleCounter count = new HoleCounter();
         count.visit(module);
@@ -186,7 +186,7 @@ public class TestTemplatParsing {
                 "        ((param[0] + :[[l2]],) + param[1:]) for param in params\n" +
                 "    ])\n" +
                 "  return benchmark_params";
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module module = parser.parseTemplates(code);
         HoleCounter count = new HoleCounter();
         count.visit(module);
@@ -203,7 +203,7 @@ public class TestTemplatParsing {
                 "    raise ValueError('Loss function is required.')\n" +
                 "if :[[l3]] < :[[l4]]:\n" +
                 "    raise ValueError('`num_gpus` cannot be negative')\n";
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module module = parser.parseTemplates(code);
         HoleCounter count = new HoleCounter();
         count.visit(module);
@@ -225,7 +225,7 @@ public class TestTemplatParsing {
                 "        iters=load_result['iters'],\n" +
                 "        wall_time=:[[l3]],\n" +
                 "        name=load_result['name'])";
-        ConcreatePythonParser parser = new ConcreatePythonParser();
+        ConcreteJavaParser parser = new ConcreteJavaParser();
         Module module = parser.parseTemplates(code);
         HoleCounter count = new HoleCounter();
         count.visit(module);
