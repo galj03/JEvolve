@@ -9,7 +9,10 @@ import com.matching.fgpdg.*;
 import com.matching.fgpdg.nodes.Guards;
 import com.matching.fgpdg.nodes.TypeInfo.TypeWrapper;
 import com.utils.FileIO;
+import com.visitors.ASTBaseVisitor;
 import io.vavr.Tuple;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.python.antlr.Visitor;
 import org.python.antlr.ast.*;
 import org.python.antlr.ast.Module;
@@ -58,24 +61,24 @@ public class Utils {
                 ;
     }
 
-    public static ArrayList<File> getPythonFiles(File[] files) {
-        ArrayList<File> pythonFiles = new ArrayList<>();
+    public static ArrayList<File> getJavaFiles(File[] files) {
+        ArrayList<File> javaFiles = new ArrayList<>();
         for (File file : files) {
             if (file.isDirectory()) {
                 if (!file.getName().startsWith(".")) {
-                    pythonFiles.addAll(getPythonFiles(Objects.requireNonNull(file.listFiles()))); // Calls same method again.
+                    javaFiles.addAll(getJavaFiles(Objects.requireNonNull(file.listFiles()))); // Calls same method again.
                 }
             } else {
-                if (file.getName().endsWith(".py")) {
-                    pythonFiles.add(file);
+                if (file.getName().endsWith(".java")) { //prev: ".py"
+                    javaFiles.add(file);
                 }
             }
         }
-        return pythonFiles;
+        return javaFiles;
     }
 
-    public static ArrayList<FunctionDef>  getAllFunctions(Module ast){
-        PyFuncDefVisitor fu = new PyFuncDefVisitor();
+    public static ArrayList<MethodDeclaration>  getAllFunctions(CompilationUnit ast){
+        JavaMethodDeclarationVisitor fu = new JavaMethodDeclarationVisitor();
         try {
             fu.visit(ast);
             return fu.funcDefs;
@@ -84,22 +87,23 @@ public class Utils {
         }
     }
 
-    static class PyFuncDefVisitor extends Visitor {
-        ArrayList<FunctionDef> funcDefs = new ArrayList<>();
+    static class JavaMethodDeclarationVisitor extends ASTBaseVisitor {
+        ArrayList<MethodDeclaration> funcDefs = new ArrayList<>();
         @Override
-        public Object visitFunctionDef(FunctionDef node) throws Exception {
+        public boolean visit(MethodDeclaration node) {
             funcDefs.add(node);
-            return super.visitFunctionDef (node);
+            return super.visit(node);
         }
     }
 
     public static List<MatchedNode> getMatchedNodes(String filename, String patternname, List<MatchedNode> graphs) throws Exception {
-        Module codeModule = getPythonModule("author/project/"+filename+".py");
-        Module patternModule = getPythonModuleForTemplate(getPathToResources("author/project/"+patternname+".py"));
+        CompilationUnit codeModule = getCompilationUnit("author/project/"+filename+".py");
+        CompilationUnit patternModule = getCompilationUnitForTemplate(getPathToResources("author/project/"+patternname+".py"));
         return getMatchedNodes(filename, patternname,null, codeModule, patternModule,null);
     }
 
-    public static List<MatchedNode> getMatchedNodes(String filename, String lpatternname,String rpatternname,  Module codeModule, Module lpatternModule,Module rpatternModule) throws IOException {
+    public static List<MatchedNode> getMatchedNodes(String filename, String lpatternname,String rpatternname,
+                                    CompilationUnit codeModule, CompilationUnit lpatternModule, CompilationUnit rpatternModule) throws IOException {
         List<MatchedNode> graphs;
         FunctionDef func=null;
         for (org.python.antlr.base.stmt stmt : codeModule.getInternalBody()) {
@@ -140,12 +144,12 @@ public class Utils {
         return graphs;
     }
 
-    public static Module getPythonModule(String fileName){
+    public static CompilationUnit getCompilationUnit(String fileName){
         ConcreteJavaParser parser = new ConcreteJavaParser();
         return parser.parse(fileName);
     }
 
-    public static Module getPythonModuleForTemplate(String fileName) throws Exception {
+    public static CompilationUnit getCompilationUnitForTemplate(String fileName) throws Exception {
         ConcreteJavaParser parser = new ConcreteJavaParser();
         return parser.parseTemplates(FileIO.readStringFromFile(fileName));
     }
@@ -156,8 +160,5 @@ public class Utils {
             return f.getAbsolutePath();
         }
         return Utils.class.getClassLoader().getResource(name).getPath();
-
     }
-
-
 }

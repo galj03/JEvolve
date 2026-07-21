@@ -1,7 +1,6 @@
 package com.prune;
 
 import org.junit.jupiter.api.Test;
-import org.python.core.PyObject;
 
 
 class MainPruneEngineTest {

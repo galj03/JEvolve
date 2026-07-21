@@ -25,10 +25,10 @@ public class TestPyEvolve {
         String rpatternname = "r_pattern12";
         BasicCombyOperations op = new BasicCombyOperations();
 
-        Module codeModule = Utils.getPythonModule("author/project/"+filename+".py");
+        Module codeModule = Utils.getCompilationUnit("author/project/"+filename+".py");
         String code = codeModule.getInternalBody().get(1).toString();
-        Module lpatternModule = Utils.getPythonModuleForTemplate(Utils.getPathToResources("author/project/"+lpatternname+".py"));
-        Module rpatternModule = Utils.getPythonModuleForTemplate(Utils.getPathToResources("author/project/"+rpatternname+".py"));
+        Module lpatternModule = Utils.getCompilationUnitForTemplate(Utils.getPathToResources("author/project/"+lpatternname+".py"));
+        Module rpatternModule = Utils.getCompilationUnitForTemplate(Utils.getPathToResources("author/project/"+rpatternname+".py"));
         List<MatchedNode> matchedNodes = getMatchedNodes(filename, lpatternname,rpatternname, codeModule, lpatternModule,rpatternModule);
         List<MatchedNode> allMatchedGraphs = matchedNodes.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
         AdaptRule aRule= new AdaptRule(allMatchedGraphs.get(0), (FunctionDef) codeModule.getInternalBody().get(1),rpatternModule);
@@ -48,10 +48,10 @@ public class TestPyEvolve {
         String rpatternname = "r_pattern12";
         BasicCombyOperations op = new BasicCombyOperations();
 
-        Module codeModule = Utils.getPythonModule("author/project/"+filename+".py");
+        Module codeModule = Utils.getCompilationUnit("author/project/"+filename+".py");
         String code = codeModule.getInternalBody().get(1).toString();
-        Module lpatternModule = Utils.getPythonModuleForTemplate(Utils.getPathToResources("author/project/"+lpatternname+".py"));
-        Module rpatternModule = Utils.getPythonModuleForTemplate(Utils.getPathToResources("author/project/"+rpatternname+".py"));
+        Module lpatternModule = Utils.getCompilationUnitForTemplate(Utils.getPathToResources("author/project/"+lpatternname+".py"));
+        Module rpatternModule = Utils.getCompilationUnitForTemplate(Utils.getPathToResources("author/project/"+rpatternname+".py"));
         List<MatchedNode> matchedNodes = getMatchedNodes(filename, lpatternname,rpatternname, codeModule, lpatternModule,rpatternModule);
         List<MatchedNode> allMatchedGraphs = matchedNodes.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
         AdaptRule aRule= new AdaptRule(allMatchedGraphs.get(0), (FunctionDef) codeModule.getInternalBody().get(1),rpatternModule);

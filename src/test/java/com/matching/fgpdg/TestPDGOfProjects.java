@@ -25,7 +25,7 @@ public class TestPDGOfProjects {
     void testKerasPDG() {
         String projectPath = Configurations.PROJECT_REPOSITORY+"keras-team/keras/";
         File dir = new File(projectPath);
-        ArrayList<File> files = Utils.getPythonFiles(Objects.requireNonNull(dir.listFiles()));
+        ArrayList<File> files = Utils.getJavaFiles(Objects.requireNonNull(dir.listFiles()));
         for (File file : files) {
             System.out.println(file.getAbsolutePath());
             ConcreteJavaParser parser = new ConcreteJavaParser();
@@ -51,7 +51,7 @@ public class TestPDGOfProjects {
     void testTensorFlowPDG() {
         String projectPath = Configurations.PROJECT_REPOSITORY+"nltk/nltk/";
         File dir = new File(projectPath);
-        ArrayList<File> files = Utils.getPythonFiles(Objects.requireNonNull(dir.listFiles()));
+        ArrayList<File> files = Utils.getJavaFiles(Objects.requireNonNull(dir.listFiles()));
         for (File file : files) {
             System.out.println(file.getAbsolutePath());
             ConcreteJavaParser parser = new ConcreteJavaParser();
@@ -77,7 +77,7 @@ public class TestPDGOfProjects {
     void testPytorchPDG() {
         String projectPath = Configurations.PROJECT_REPOSITORY+"pytorch/pytorch/";
         File dir = new File(projectPath);
-        ArrayList<File> files = Utils.getPythonFiles(Objects.requireNonNull(dir.listFiles()));
+        ArrayList<File> files = Utils.getJavaFiles(Objects.requireNonNull(dir.listFiles()));
         for (File file : files) {
             System.out.println(file.getAbsolutePath());
             ConcreteJavaParser parser = new ConcreteJavaParser();

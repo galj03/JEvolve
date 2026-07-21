@@ -50,7 +50,7 @@ public class TestPatternMatching {
         File dir = new File(projectPath);
         if (dir.listFiles()==null)
             return;
-        ArrayList<File> files = Utils.getPythonFiles(Objects.requireNonNull(dir.listFiles()));
+        ArrayList<File> files = Utils.getJavaFiles(Objects.requireNonNull(dir.listFiles()));
         Guards guards = new Guards(com.utils.Utils.getFileContent(getPathToResources(patternPath)),patternModule);
         TypeWrapper wrapper = new TypeWrapper(guards);
         PDGBuildingContext patternContext = new PDGBuildingContext(patternModule.getInternalBody().stream().filter(x -> x instanceof Import
@@ -132,7 +132,7 @@ public class TestPatternMatching {
         File dir = new File(path);
         if (dir.listFiles()==null)
             return new ArrayList<> ();
-        return Utils.getPythonFiles(Objects.requireNonNull(dir.listFiles()));
+        return Utils.getJavaFiles(Objects.requireNonNull(dir.listFiles()));
     }
 
     private Module getPythonModule(String fileName){

@@ -658,7 +658,9 @@ public class ConcreteJavaParser {
 
         private void updateParent(ASTNode node) {
             for (ASTNode child : JavaASTUtil.getChildren(node)) {
-                child.setParent(node); //TODO: setParent does not work
+//                child.setParent(node); //TODO: setParent does not work
+                //TODO: test if they actually match (if not, then set it)
+                System.out.printf("Child: '%s', parent: '%s', 'new' parent: '%s'\n", child, child.getParent(), node);
             }
         }
 

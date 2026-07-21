@@ -2,20 +2,19 @@ package com;
 
 import com.matching.fgpdg.Configurations;
 import com.utils.FileIO;
+import com.utils.Utils;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.python.antlr.ast.FunctionDef;
-import org.python.antlr.ast.Import;
-import org.python.antlr.ast.ImportFrom;
-import org.python.antlr.ast.Module;
-import org.python.antlr.base.stmt;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.inferrules.Utils.getPathToResources;
 
+//TODO: adapt to Java
 class MainAdaptorTest {
     @BeforeEach
     public void setUp(){
@@ -67,18 +66,18 @@ class MainAdaptorTest {
         String LHS = "/Users/malinda/Documents/Research3/InferRules/src/test/resources/author/project/pattern12.py";
         String RHS = "/Users/malinda/Documents/Research3/InferRules/src/test/resources/author/project/r_pattern12.py";
 
-        Module codeModule = com.utils.Utils.getCompilationUnit(projectFile);
-        stmt stmt = codeModule.getInternalBody().get(1);
-        List<org.python.antlr.base.stmt> imports = codeModule.getInternalBody().stream().filter(x -> x instanceof Import
-                || x instanceof ImportFrom).collect(Collectors.toList());
-        String s = MainAdaptor.transplantPatternToFunction(projectFile, (FunctionDef) stmt,imports,LHS,
+        CompilationUnit codeModule = com.utils.Utils.getCompilationUnit(projectFile);
+        MethodDeclaration stmt = Utils.getAllMethods(codeModule).get(1);
+        List<ImportDeclaration> imports = codeModule.imports();//Utils.getAllFunctions(codeModule);
+        String s = MainAdaptor.transplantPatternToFunction(projectFile, stmt,imports,LHS,
                 RHS,FileIO.readFile(Configurations.PROJECT_REPOSITORY + projectFile));
         System.out.println(s);
-        Assertions.assertEquals("def function1(sentence, callbacks):\n" +
-                "    ff = {one:1,two:2}\n" +
-                "    print(ff)\n" +
-                "    z = np.sum(ff.values())\n" +
-                "return z",s);
+        Assertions.assertEquals("""
+                def function1(sentence, callbacks):
+                    ff = {one:1,two:2}
+                    print(ff)
+                    z = np.sum(ff.values())
+                return z""",s);
     }
 
     @Test

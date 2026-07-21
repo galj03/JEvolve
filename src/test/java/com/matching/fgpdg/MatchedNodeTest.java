@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.inferrules.Utils.getMatchedNodes;
-import static org.inferrules.Utils.getPythonModule;
+import static org.inferrules.Utils.getCompilationUnit;
 
 class MatchedNodeTest {
 
@@ -453,7 +453,7 @@ class MatchedNodeTest {
 
     @Test
     void testGetPatternGraphForMatching1() {
-        Module codeModule = getPythonModule("author/project/pattern2.py");
+        Module codeModule = getCompilationUnit("author/project/pattern2.py");
         PDGBuildingContext mcontext = null;
         try {
             mcontext = new PDGBuildingContext(codeModule.getInternalBody().stream().filter(x-> x instanceof Import
@@ -483,7 +483,7 @@ class MatchedNodeTest {
 
     @Test
     void testGetPatternGraphForMatching2() {
-        Module codeModule = getPythonModule("author/project/pattern5.py");
+        Module codeModule = getCompilationUnit("author/project/pattern5.py");
         PDGBuildingContext mcontext = null;
         try {
             mcontext = new PDGBuildingContext(codeModule.getInternalBody().stream().filter(x-> x instanceof Import
@@ -576,7 +576,7 @@ class MatchedNodeTest {
 
     @Test
     void canWalkFromNodeToNode() {
-        Module codeModule = getPythonModule("author/project/testm9.py");
+        Module codeModule = getCompilationUnit("author/project/testm9.py");
         FunctionDef func=null;
         for (org.python.antlr.base.stmt stmt : codeModule.getInternalBody()) {
             if (stmt instanceof FunctionDef){

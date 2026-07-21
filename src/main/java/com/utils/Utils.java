@@ -355,13 +355,12 @@ public class Utils {
 
     }
 
-    //TODO: rename
     public static CompilationUnit getCompilationUnit(String fileName){
         ConcreteJavaParser parser = new ConcreteJavaParser();
         return parser.parse(fileName);
     }
 
-    public static ArrayList<MethodDeclaration>  getAllFunctions(CompilationUnit ast){
+    public static ArrayList<MethodDeclaration> getAllMethods(CompilationUnit ast){
         MethodDeclarationVisitor fu = new MethodDeclarationVisitor();
         try {
             fu.visit(ast);
@@ -458,14 +457,13 @@ public class Utils {
         ConcreteJavaParser parser = new ConcreteJavaParser();
         return Try.of(()->parser.parseTemplates(FileIO.readStringFromFile(fileName)));
     }
-    //TODO: rename methods
 
     public static List<ASTNode> getContinousStatments(List<ASTNode> subtree) {
         int start = subtree.stream().map(x -> (ASTNode) x).map(ASTNode::getCharStartIndex).min(Integer::compare).get();
         int stop = subtree.stream().map(x -> (ASTNode) x).map(ASTNode::getCharStopIndex).max(Integer::compare).get();
         List<ASTNode> continousNodes  = new ArrayList<>();
         if (!subtree.isEmpty()){
-            for (ASTNode child : JavaASTUtil.getChildren(((ASTNode) subtree.getFirst()).getParent())) {
+            for (ASTNode child : JavaASTUtil.getChildren(subtree.getFirst().getParent())) {
                 if (start<=child.getCharStartIndex() && child.getCharStartIndex()<=stop){
                     continousNodes.add(child);
                 }

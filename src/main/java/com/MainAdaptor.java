@@ -232,7 +232,7 @@ public class MainAdaptor {
         StringBuilder adaptedFile = new StringBuilder();
         List<String> splittedFile = new ArrayList<>();
         int previousStop = 0;
-        for (MethodDeclaration stmt : Utils.getAllFunctions(codeModule)) {
+        for (MethodDeclaration stmt : Utils.getAllMethods(codeModule)) {
             if (!stmt.getBody().statements().isEmpty()){ //prev:  .getInternalBody().size()
                 int charStartIndex = stmt.getBody().getStartPosition();// .getCharStartIndex();
                 int charStopIndex = stmt.getBody().getLength();//TODO: check!!!!! // .getInternalBody().get(stmt.getInternalBody().size() - 1).getCharStopIndex();
@@ -269,7 +269,7 @@ public class MainAdaptor {
         CompilationUnit rpatternModule = Utils.getCompilationUnitForTemplate(RHS).onFailure(System.err::println).get();
 
         List<MatchedNode> matchedNodes = getMatchedNodes(filename, LHS, def, imports, lpatternModule);
-        List<MatchedNode> allMatchedGraphs = matchedNodes.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
+        List<MatchedNode> allMatchedGraphs = matchedNodes.stream().filter(MatchedNode::isAllChildsMatched).toList();
 
         //TODO: why check only 1??? - allMatchedGraphs
         if (allMatchedGraphs.size() != 0) {
