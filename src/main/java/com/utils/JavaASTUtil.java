@@ -1,5 +1,7 @@
 package com.utils;
 
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.misc.Interval;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
@@ -9,11 +11,16 @@ import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.internal.core.dom.NaiveASTFlattener;
 //import treed.TreedConstants;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class JavaASTUtil {
 	private static final HashMap<ModifierKeyword, Integer> modifierType = new HashMap<>();
-	
+
 	static {
 		modifierType.put(ModifierKeyword.ABSTRACT_KEYWORD, 1);
 		modifierType.put(ModifierKeyword.DEFAULT_KEYWORD, 2);
@@ -34,7 +41,7 @@ public class JavaASTUtil {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static ASTNode parseSource(String source) {
+	public static CompilationUnit parseSource(String source) {
 		Map options = JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_7);
 		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_7);
@@ -42,12 +49,11 @@ public class JavaASTUtil {
 		ASTParser parser = ASTParser.newParser(AST.JLS15);
     	parser.setSource(source.toCharArray());
     	parser.setCompilerOptions(options);
-    	ASTNode ast = parser.createAST(null);
-		return ast;
+        return (CompilationUnit) parser.createAST(null);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static ASTNode parseSource(String source, String name) {
+	public static CompilationUnit parseSource(String source, String name) {
 		Map options = JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_7);
 		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_7);
@@ -56,19 +62,18 @@ public class JavaASTUtil {
     	parser.setSource(source.toCharArray());
     	parser.setCompilerOptions(options);
 		parser.setEnvironment(
-				new String[]{}, 
-				new String[]{}, 
-				new String[]{}, 
+				new String[]{},
+				new String[]{},
+				new String[]{},
 				true);
 		parser.setResolveBindings(true);
 		parser.setBindingsRecovery(true);
     	parser.setUnitName(name);
-    	ASTNode ast = parser.createAST(null);
-		return ast;
+        return (CompilationUnit) parser.createAST(null);
 	}
-	
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static ASTNode parseSource(String source, int kind) {
+	public static CompilationUnit parseSource(String source, int kind) {
 		Map options = JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_7);
 		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_7);
@@ -77,14 +82,37 @@ public class JavaASTUtil {
     	parser.setSource(source.toCharArray());
     	parser.setCompilerOptions(options);
     	parser.setKind(kind);
-    	ASTNode ast = parser.createAST(null);
-		return ast;
+        return (CompilationUnit) parser.createAST(null);
 	}
-	
+
 	public static String getSource(ASTNode node) {
 		NaiveASTFlattener flatterner = new NaiveASTFlattener();
 		node.accept(flatterner);
 		return flatterner.getResult();
+	}
+
+    public static String convertStreamToString(CharStream charStream) throws IOException {
+        return charStream.getText(new Interval(0, charStream.size()-1));
+        //TODO: test that it does not cut off the end
+    }
+
+	//TODO: test if it works
+	public static List<ASTNode> getChildren(ASTNode node) {
+		List<ASTNode> children = new ArrayList<>();
+		for (Object propertyObject : node.structuralPropertiesForType()) {
+			StructuralPropertyDescriptor property = (StructuralPropertyDescriptor) propertyObject;
+			Object value = node.getStructuralProperty(property);
+			if (value instanceof ASTNode) {
+				children.add((ASTNode) value);
+			} else if (value instanceof List<?>) {
+				for (Object childObject : (List<?>) value) {
+					if (childObject instanceof ASTNode) {
+						children.add((ASTNode) childObject);
+					}
+				}
+			}
+		}
+		return children;
 	}
 
 	public static boolean isLiteral(int astNodeType) {
@@ -93,10 +121,10 @@ public class JavaASTUtil {
 
 	public static boolean isLiteral(ASTNode node) {
 		int type = node.getNodeType();
-		if (type == ASTNode.BOOLEAN_LITERAL || 
-				type == ASTNode.CHARACTER_LITERAL || 
-				type == ASTNode.NULL_LITERAL || 
-				type == ASTNode.NUMBER_LITERAL || 
+		if (type == ASTNode.BOOLEAN_LITERAL ||
+				type == ASTNode.CHARACTER_LITERAL ||
+				type == ASTNode.NULL_LITERAL ||
+				type == ASTNode.NUMBER_LITERAL ||
 				type == ASTNode.STRING_LITERAL)
 			return true;
 		if (type == ASTNode.PREFIX_EXPRESSION) {
@@ -111,7 +139,7 @@ public class JavaASTUtil {
 			ParenthesizedExpression pe = (ParenthesizedExpression) node;
 			return isLiteral(pe.getExpression());
 		}
-		
+
 		return false;
 	}
 
@@ -130,12 +158,12 @@ public class JavaASTUtil {
 			public boolean visit(MethodDeclaration node) {
 				return super.visit(node);
 			}
-			
+
 			@Override
 			public boolean visit(Javadoc node) {
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(Block node) {
 				return false;
@@ -171,7 +199,7 @@ public class JavaASTUtil {
 			return getSimpleType(t.getType());
 		} else if (type.isPrimitiveType()) {
 			String pt = type.toString();
-			if (pt.equals("byte") || pt.equals("short") || pt.equals("int") || pt.equals("long") 
+			if (pt.equals("byte") || pt.equals("short") || pt.equals("int") || pt.equals("long")
 					|| pt.equals("float") || pt.equals("double"))
 				return "number";
 			return pt;
@@ -180,7 +208,7 @@ public class JavaASTUtil {
 			return t.getName().getIdentifier();
 		} else if (type.isSimpleType()) {
 			String pt = type.toString();
-			if (pt.equals("Byte") || pt.equals("Short") || pt.equals("Integer") || pt.equals("Long") 
+			if (pt.equals("Byte") || pt.equals("Short") || pt.equals("Integer") || pt.equals("Long")
 					|| pt.equals("Float") || pt.equals("Double"))
 				return "number";
 			return pt;
@@ -319,7 +347,7 @@ public class JavaASTUtil {
 		String op = operator.toString();
 		return op.substring(0, op.length() - 1);
 	}
-	
+
 	public static TypeDeclaration getType(TypeDeclaration td, String name) {
 		for (TypeDeclaration inner : td.getTypes())
 			if (inner.getName().getIdentifier().equals(name))
@@ -358,18 +386,18 @@ public class JavaASTUtil {
 		class LeaveCountASTVisitor extends ASTVisitor {
 			private Stack<Integer> numOfChildren = new Stack<Integer>();
 			private int numOfLeaves = 0;
-			
+
 			public LeaveCountASTVisitor() {
 				numOfChildren.push(0);
 			}
-			
+
 			@Override
 			public void preVisit(ASTNode node) {
 				int n = numOfChildren.pop();
 				numOfChildren.push(n + 1);
 				numOfChildren.push(0);
 			}
-			
+
 			@Override
 			public void postVisit(ASTNode node) {
 				int n = numOfChildren.pop();
@@ -385,7 +413,7 @@ public class JavaASTUtil {
 	public static ArrayList<String> tokenizeNames(ASTNode node) {
 		return new ASTVisitor() {
 			private ArrayList<String> names = new ArrayList<>();
-			
+
 			@Override
 			public boolean visit(SimpleName node) {
 				names.add(node.getIdentifier());
@@ -397,64 +425,64 @@ public class JavaASTUtil {
 	public static HashSet<String> getComputationDatas(ASTNode e) {
 		class DataCollectingASTVisitor extends ASTVisitor {
 			private HashSet<String> datas = new HashSet<>();
-			
+
 			@Override
 			public boolean visit(FieldAccess node) {
 				datas.add(node.toString());
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(ArrayAccess node) {
 				datas.add(node.toString());
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(MethodInvocation node) {
 				datas.add(node.toString());
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(QualifiedName node) {
 				datas.add(node.toString());
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(SimpleName node) {
 				datas.add(node.toString());
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(SuperFieldAccess node) {
 				datas.add(node.toString());
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(SuperMethodInvocation node) {
 				datas.add(node.toString());
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(AnonymousClassDeclaration node) {
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(MethodDeclaration node) {
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(QualifiedType node) {
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(TypeDeclaration node) {
 				return false;
@@ -468,19 +496,19 @@ public class JavaASTUtil {
 	public static HashSet<String> getConditionDatas(ASTNode e) {
 		class DataCollectingASTVisitor extends ASTVisitor {
 			private HashSet<String> datas = new HashSet<>();
-			
+
 			@Override
 			public boolean visit(FieldAccess node) {
 				datas.add(node.toString());
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(ArrayAccess node) {
 				datas.add(node.toString());
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(MethodInvocation node) {
 				datas.add(node.toString());
@@ -491,25 +519,25 @@ public class JavaASTUtil {
 				}
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(QualifiedName node) {
 				datas.add(node.toString());
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(SimpleName node) {
 				datas.add(node.toString());
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(SuperFieldAccess node) {
 				datas.add(node.toString());
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(SuperMethodInvocation node) {
 				datas.add(node.toString());
@@ -519,22 +547,22 @@ public class JavaASTUtil {
 				}
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(AnonymousClassDeclaration node) {
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(MethodDeclaration node) {
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(QualifiedType node) {
 				return false;
 			}
-			
+
 			@Override
 			public boolean visit(TypeDeclaration node) {
 				return false;
@@ -612,7 +640,7 @@ public class JavaASTUtil {
 					return false;
 				return true;
 			}
-			
+
 			@Override
 			public void postVisit(ASTNode node) {
 				if (results[0] == null && node.getStartPosition() <= start && node.getStartPosition() + node.getLength() >= end)

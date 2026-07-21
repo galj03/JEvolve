@@ -3,23 +3,25 @@ package com.matching;
 import com.matching.fgpdg.nodes.ast.AlphanumericHole;
 import com.matching.fgpdg.nodes.ast.LazyHole;
 import com.utils.Assertions;
-import org.antlr.runtime.ANTLRInputStream;
+import com.utils.JavaASTUtil;
+import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CharStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.python.antlr.AnalyzingParser;
 import org.python.antlr.PythonTree;
-import org.python.antlr.Visitor;
 import org.python.antlr.ast.*;
 import org.python.antlr.ast.Module;
 import org.python.antlr.base.*;
-import org.python.core.PyObject;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,17 +30,16 @@ public class ConcreatePythonParser  {
 
     }
 
-    //TODO
     public CompilationUnit parse(String fileName) {
-        URLModule inputStream = new URLModule(fileName);
-        CharStream file = null;
+//        URLModule inputStream = new URLModule(fileName);
         try {
-            file = new ANTLRInputStream(inputStream.getInputStream(fileName));
-            PythonParser parser =new PythonParser(file, inputStream.getName(), "UTF-8");
-            mod mod = parser.parseModule();
-            ParentUpdater pUpdater = new ParentUpdater();
-            pUpdater.visit(mod);
-            return  (Module)mod;
+            CharStream file = CharStreams.fromFileName(fileName); //new ANTLRInputStream(inputStream.getInputStream(fileName));
+            return JavaASTUtil.parseSource(JavaASTUtil.convertStreamToString(file));
+//            PythonParser parser =new PythonParser(file, inputStream.getName(), "UTF-8");
+//            mod mod = parser.parseModule();
+//            ParentUpdater pUpdater = new ParentUpdater();
+//            pUpdater.visit(mod);
+//            return  (Module)mod;
         } catch (Exception | NoClassDefFoundError e) {
             return null;
         }
@@ -87,16 +88,16 @@ public class ConcreatePythonParser  {
         return sb1.toString();
     }
 
-
-    public Module parse(InputStream code)  {
+    public CompilationUnit parse(InputStream code)  {
         CharStream file = null;
         try {
-            file = new ANTLRInputStream(code);
+            file = CharStreams.fromStream(code); //new ANTLRInputStream(code);
+            return JavaASTUtil.parseSource(JavaASTUtil.convertStreamToString(file));
         } catch (IOException e) {
             Assertions.UNREACHABLE();
         }
-        PythonParser parser =new PythonParser(file, "", "UTF-8");
-        return (Module)parser.parseModule();
+//        PythonParser parser =new PythonParser(file, "", "UTF-8");
+//        return (Module)parser.parseModule();
     }
 
     class PythonParser extends AnalyzingParser {
@@ -664,12 +665,13 @@ public class ConcreatePythonParser  {
             return super.visitExtSlice(node);
         }
 
+        //TODO: how to resolve this???
         @Override
-        public Object visitExpr(Eexpr node) throws Exception {
+        public boolean visit(Expression node) throws Exception {
             updateParent(node);
 
 //            node.getInternalValue().setParent(node);
-            return super.visitExpr(node);
+            return super.visit(node);
         }
 
         @Override
@@ -682,25 +684,22 @@ public class ConcreatePythonParser  {
 
         }
 
-        private void updateParent(stmt node) {
-            for (PythonTree child : node.getChildren()) {
-                child.setParent(node);
-            }
-        }
+//        private void updateParent(stmt node) {
+//            for (PythonTree child : node.getChildren()) {
+//                child.setParent(node);
+//            }
+//        }
 
-        private void updateParent(PythonTree node) {
-            for (PythonTree child : node.getChildren()) {
-                child.setParent(node);
+        private void updateParent(ASTNode node) {
+            for (ASTNode child : JavaASTUtil.getChildren(node)) {
+                child.setParent(node); //TODO
             }
         }
-        private void updateParent(expr node) {
-            if (node.getChildren()!=null){
-                for (PythonTree child : node.getChildren()) {
-                    child.setParent(node);
-                }
-            }
-
-        }
+//        private void updateParent(Expression node) {
+//            for (ASTNode child : JavaASTUtil.getChildren(node)) {
+//                child.setParent(node);
+//            }
+//        }
 
         @Override
         public Object visitTuple(Tuple node) throws Exception{

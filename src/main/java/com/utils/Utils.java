@@ -16,7 +16,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.python.antlr.PythonTree;
 import org.python.antlr.Visitor;
-import org.python.antlr.ast.Module;
 import org.python.antlr.ast.*;
 import org.python.antlr.base.expr;
 import org.python.antlr.base.stmt;
@@ -25,9 +24,7 @@ import org.python.core.PyObject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.List;
 import java.util.*;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Utils {
@@ -393,10 +390,10 @@ public class Utils {
     }
 
     public static ArrayList<MethodDeclaration>  getAllFunctions(CompilationUnit ast){
-        PyFuncDefVisitor fu = new PyFuncDefVisitor();
+        MethodDeclarationVisitor fu = new MethodDeclarationVisitor();
         try {
             fu.visit(ast);
-            return fu.funcDefs;
+            return fu.methodDeclarations;
         } catch (Exception e) {
             return new ArrayList<>();
         }
@@ -485,17 +482,18 @@ public class Utils {
         }
     }
 
+    //TODO: rename methods
     public static Try<CompilationUnit> getPythonModuleForTemplate(String fileName) {
         ConcreatePythonParser parser = new ConcreatePythonParser();
         return Try.of(()->parser.parseTemplates(FileIO.readStringFromFile(fileName)));
     }
 
     public static List<ASTNode> getContinousStatments(List<ASTNode> subtree) {
-        int start = subtree.stream().map(x -> (PythonTree) x).map(PythonTree::getCharStartIndex).min(Integer::compare).get();
-        int stop = subtree.stream().map(x -> (PythonTree) x).map(PythonTree::getCharStopIndex).max(Integer::compare).get();
+        int start = subtree.stream().map(x -> (ASTNode) x).map(ASTNode::getCharStartIndex).min(Integer::compare).get();
+        int stop = subtree.stream().map(x -> (ASTNode) x).map(ASTNode::getCharStopIndex).max(Integer::compare).get();
         List<ASTNode> continousNodes  = new ArrayList<>();
-        if (subtree.size()>0){
-            for (PythonTree child : ((PythonTree) subtree.get(0)).getParent().getChildren()) {
+        if (!subtree.isEmpty()){
+            for (ASTNode child : JavaASTUtil.getChildren(((ASTNode) subtree.getFirst()).getParent())) {
                 if (start<=child.getCharStartIndex() && child.getCharStartIndex()<=stop){
                     continousNodes.add(child);
                 }
@@ -504,41 +502,36 @@ public class Utils {
         return continousNodes;
     }
 
-    //TODO: trees again...
     static class CheckChildNode extends ASTVisitor{
         private boolean isChild = false;
-        private PythonTree childTree=null;
-        public CheckChildNode(PythonTree cTree) {
-            this.childTree = cTree;
-        }
+        private ASTNode childTree=null;
+        // public CheckChildNode(PythonTree cTree) {
+        //     this.childTree = cTree;
+        // }
 
         public CheckChildNode(ASTNode cTree) {
-            this.childTree = (PythonTree)cTree;
+            this.childTree = cTree;
         }
 
         @Override
         public void preVisit(ASTNode node) {
-
+            if (childTree!=null// && JavaASTUtil.getChildren(node)!=null
+                && JavaASTUtil.getChildren(node).contains(childTree))
+                isChild=true;
+            super.preVisit(node);
         }
 
         @Override
         public void postVisit(ASTNode node) {
 
         }
-
-        //TODO: find an equivalent for this
-        @Override
-        public Object unhandled_node(PythonTree node) throws Exception {
-            if (childTree!=null && node.getChildren()!=null && node.getChildren().contains(childTree))
-                isChild=true;
-            return super.unhandled_node(node);
-        }
+        
         public boolean isChild() {
             return isChild;
         }
     }
 
-static class Interval
+    static class Interval
     {
         int start;
         int end;
@@ -586,11 +579,11 @@ static class Interval
         }
     }
 
-    static class PyFuncDefVisitor extends ASTVisitor {
-        ArrayList<MethodDeclaration> funcDefs = new ArrayList<>();
+    static class MethodDeclarationVisitor extends ASTVisitor {
+        ArrayList<MethodDeclaration> methodDeclarations = new ArrayList<>();
         @Override
         public boolean visit(MethodDeclaration node){
-            funcDefs.add(node);
+            methodDeclarations.add(node);
             return super.visit(node);
         }
 
@@ -604,11 +597,4 @@ static class Interval
 
         }
     }
-
-
-
-
-
-
-
 }
