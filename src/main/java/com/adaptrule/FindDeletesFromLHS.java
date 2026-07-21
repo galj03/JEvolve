@@ -1,5 +1,6 @@
 package com.adaptrule;
 
+import com.visitors.ASTBaseVisitor;
 import org.eclipse.jdt.core.dom.*;
 import org.python.antlr.PythonTree;
 import org.python.antlr.ast.*;
@@ -9,7 +10,7 @@ import org.python.antlr.base.stmt;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FindDeletesFromLHS extends ASTVisitor {
+public class FindDeletesFromLHS extends ASTBaseVisitor {
     ASTNode finalDeletedNode=null; //this was PythonTree
     List<ASTNode> matchedNode;
     java.util.List<ASTNode> deletes = new ArrayList<>(); //this was PythonTree

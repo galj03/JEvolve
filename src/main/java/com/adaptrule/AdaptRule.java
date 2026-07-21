@@ -3,13 +3,14 @@ package com.adaptrule;
 import com.matching.fgpdg.MatchedNode;
 import com.matching.fgpdg.nodes.Guards;
 import com.matching.fgpdg.nodes.PDGNode;
+import com.utils.JavaASTUtil;
+import com.utils.MethodDeclarationVisitor;
+import com.utils.Utils;
 import org.eclipse.jdt.core.dom.*;
 import org.python.antlr.PythonTree;
 import org.python.antlr.ast.*;
 import org.python.antlr.ast.Module;
-import org.python.antlr.base.expr;
 import org.python.antlr.base.stmt;
-import org.python.core.PyObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,9 +21,9 @@ import java.util.stream.Collectors;
 public class AdaptRule {
     MatchedNode graph;
     MethodDeclaration targetCodeAST;
-    Module rhsAST;
+    CompilationUnit rhsAST;
     Map<PythonTree, Hole> nameToHole;
-    public AdaptRule(MatchedNode graph, MethodDeclaration targetCodeAST, Module rpatternModule) {
+    public AdaptRule(MatchedNode graph, MethodDeclaration targetCodeAST, CompilationUnit rpatternModule) {
         this.graph = graph;
         this.targetCodeAST = targetCodeAST;
         this.rhsAST = rpatternModule;
@@ -46,15 +47,18 @@ public class AdaptRule {
         return rule;
     }
 
-    public MethodDeclaration getFunctionDef(Module md){
-        for (BodyDeclaration stmt : md.getInternalBody()) { //TODO: fix this, how to get methods?
-            if (stmt instanceof MethodDeclaration)
-                return (MethodDeclaration)stmt;
-        }
-        return null;
+    //TODO: remove?
+    public MethodDeclaration getFunctionDef(CompilationUnit md){
+        return Utils.getAllFunctions(md).get(0);
+//        md.accept(new MethodDeclarationVisitor());
+//        for (BodyDeclaration stmt : md.getInternalBody()) {
+//            if (stmt instanceof MethodDeclaration)
+//                return (MethodDeclaration)stmt;
+//        }
+//        return null;
     }
 
-    private MethodDeclaration createRHS(MethodDeclaration lhs, Module rhs, List<ASTNode> matchedNode) {
+    private MethodDeclaration createRHS(MethodDeclaration lhs, CompilationUnit rhs, List<ASTNode> matchedNode) {
         FindDeletesFromLHS deletes = new FindDeletesFromLHS(matchedNode);
         try {
             deletes.visit(lhs);
@@ -91,7 +95,7 @@ public class AdaptRule {
 
     private ASTNode checkFinalDeleteNodeIsAChildOfOtherDeletes(List<ASTNode> childs, ASTNode finalNode){
         for (ASTNode tree : childs) {
-            for (ASTNode child : tree.getChildren()) { //TODO: get ast node's children
+            for (ASTNode child : JavaASTUtil.getChildren(tree)) {
                 if (finalNode.equals(child)){
                     return tree;
                  }
@@ -116,11 +120,11 @@ public class AdaptRule {
     }
 
     private MethodDeclaration substituteLHStoTargetCode(){
-        Map<PythonTree, List<PythonTree>> codeAndParaNode = new HashMap<>();
+        Map<ASTNode, List<ASTNode>> codeAndParaNode = new HashMap<>();
         for (MatchedNode matchedNode : graph.getAllMatchedNodes()) {
-            PythonTree pASTNode = (PythonTree)matchedNode.getPatternNode().getAstNode();
+            ASTNode pASTNode = matchedNode.getPatternNode().getAstNode();
             if (pASTNode!=null)
-                pASTNode.isPatternNode=true;
+                pASTNode.isPatternNode=true; //TODO: custom property for this!
             if (matchedNode.getCodeNode().getAstNode() instanceof stmt){
                 continue;
             }
@@ -128,9 +132,9 @@ public class AdaptRule {
                 codeAndParaNode.get(matchedNode.getCodeNode().getAstNode()).add(pASTNode);
             }
             else{
-                List<PythonTree> matchedParaN = new ArrayList<>();
+                List<ASTNode> matchedParaN = new ArrayList<>();
                 matchedParaN.add(pASTNode);
-                codeAndParaNode.put((PythonTree) matchedNode.getCodeNode().getAstNode(),matchedParaN);
+                codeAndParaNode.put(matchedNode.getCodeNode().getAstNode(), matchedParaN);
             }
         }
         RenameLHSVisitor renameLHSVisitor = new RenameLHSVisitor();
@@ -146,13 +150,13 @@ public class AdaptRule {
     }
 
     private MethodDeclaration renameRestOfTheRenamedVarsWithHoles(MethodDeclaration targetCode){
-        Map<PythonTree, List<PythonTree>> codeAndParaNode = new HashMap<>();
+        Map<ASTNode, List<ASTNode>> codeAndParaNode = new HashMap<>();
         CollectChangedNames changedNames = new CollectChangedNames(nameToHole.keySet());
         try {
-            Map<PythonTree, List<PythonTree>> nodeAndHoleToRename = new HashMap<>();
+            Map<ASTNode, List<ASTNode>> nodeAndHoleToRename = new HashMap<>();
             changedNames.visit(targetCode);
-            for (Map.Entry<PythonTree, List<PythonTree>> entry : changedNames.getMatchedOtherNodes().entrySet()) {
-                for (PythonTree tree : entry.getValue()) {
+            for (Map.Entry<ASTNode, List<ASTNode>> entry : changedNames.getMatchedOtherNodes().entrySet()) {
+                for (ASTNode tree : entry.getValue()) {
                     nodeAndHoleToRename.put(tree, List.of(nameToHole.get(entry.getKey())));
                 }
             }

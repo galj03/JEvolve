@@ -1,16 +1,17 @@
 package com.adaptrule;
 
-import org.python.antlr.PythonTree;
-import org.python.antlr.Visitor;
+import com.visitors.ASTBaseVisitor;
+import org.eclipse.jdt.core.dom.ASTNode;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GetFlatAST extends Visitor {
-    List<PythonTree> flatTree = new ArrayList<>();
+public class GetFlatAST extends ASTBaseVisitor {
+    List<ASTNode> flatTree = new ArrayList<>();
+
     @Override
-    public Object unhandled_node(PythonTree node) throws Exception {
+    public void preVisit(ASTNode node) {
         flatTree.add(node);
-        return super.unhandled_node(node);
+        super.preVisit(node);
     }
 }

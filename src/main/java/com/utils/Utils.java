@@ -8,6 +8,7 @@ import com.matching.fgpdg.nodes.PDGActionNode;
 import com.matching.fgpdg.nodes.PDGDataNode;
 import com.matching.fgpdg.nodes.PDGNode;
 import com.matching.fgpdg.nodes.TypeInfo.TypeWrapper;
+import com.visitors.ASTBaseVisitor;
 import io.vavr.control.Try;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 
 public class Utils {
     private static int thresholdForIterations = 10;
+
     public static List<ASTNode> getMatchedASTSubGraph(MatchedNode matchedNode, MethodDeclaration def) {
         List<ASTNode> codeNodes = matchedNode.getAllMatchedNodes().stream().map(d->d.getCodeNode().getAstNode()).collect(Collectors.toList());
         List<ASTNode> withoutChildNodes = new ArrayList<>(getNonSubTreeASTNodes(codeNodes));
@@ -55,7 +57,7 @@ public class Utils {
         List<ASTNode> newNodeList = new ArrayList<>();
         List<ASTNode> childList = new ArrayList<>();
         for (int r =0;r<nodeList.size();r++){
-            PythonTree tree = (PythonTree)nodeList.get(r);
+            ASTNode tree = nodeList.get(r);
             for (ASTNode node : nodeList) {
                 if (node!=tree && tree.getParent()!=null){
                     if (Utils.isChildNode(node,tree.getParent())){
@@ -142,22 +144,10 @@ public class Utils {
         parentNodes.remove(objects.get(0));
     }
 
-
     public static boolean isChildNode(ASTNode childNode, ASTNode parentNode){
         CheckChildNode childChecker = new CheckChildNode(childNode);
         try {
-            PythonTree tree = (PythonTree)parentNode; //TODO: what is this Tree???
-            childChecker.visit(tree);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return childChecker.isChild();
-    }
-
-
-    public static boolean isChildNode(PythonTree childNode, PythonTree parentNode){
-        CheckChildNode childChecker = new CheckChildNode(childNode);
-        try {
+//            PythonTree tree = (PythonTree)parentNode;
             childChecker.visit(parentNode);
         } catch (Exception e) {
             e.printStackTrace();
@@ -220,17 +210,6 @@ public class Utils {
         FileIO.writeStringToFile(sampleChange.toString(),
                 fileName);
     };
-
-//    public static void isAllNodesMatched(List<MatchedNode> grphs, PDGGraph pattern){
-//        for (MatchedNode grph : grphs) {
-//            for (PDGNode node : pattern.getNodes()) {
-//
-//            }
-//
-//            grph.getCodePDGNodes()
-//        }
-//
-//    }
 
     public static List<Interval> getSortedList(List<Interval> duration){
         List<Interval> intervals =  (List<Interval>) ((ArrayList<Interval>) duration).clone();;
@@ -384,6 +363,7 @@ public class Utils {
 
     }
 
+    //TODO: rename
     public static CompilationUnit getPythonModule(String fileName){
         ConcreatePythonParser parser = new ConcreatePythonParser();
         return parser.parse(fileName);
@@ -399,6 +379,7 @@ public class Utils {
         }
     }
 
+    //TODO: comment it out??
     public static void searchProjectForPatterns(String projectPath, String pattern, String outputPath) throws Exception {
         File dir = new File(projectPath);
         if (dir.listFiles()==null){
@@ -502,7 +483,7 @@ public class Utils {
         return continousNodes;
     }
 
-    static class CheckChildNode extends ASTVisitor{
+    static class CheckChildNode extends ASTBaseVisitor {
         private boolean isChild = false;
         private ASTNode childTree=null;
         // public CheckChildNode(PythonTree cTree) {
@@ -578,23 +559,6 @@ public class Utils {
                     && end == c.end;
         }
     }
-
-    static class MethodDeclarationVisitor extends ASTVisitor {
-        ArrayList<MethodDeclaration> methodDeclarations = new ArrayList<>();
-        @Override
-        public boolean visit(MethodDeclaration node){
-            methodDeclarations.add(node);
-            return super.visit(node);
-        }
-
-        @Override
-        public void preVisit(ASTNode node) {
-
-        }
-
-        @Override
-        public void postVisit(ASTNode node) {
-
-        }
-    }
 }
+
+

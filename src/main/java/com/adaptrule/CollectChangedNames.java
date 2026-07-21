@@ -1,47 +1,44 @@
 package com.adaptrule;
 
-import org.python.antlr.PythonTree;
-import org.python.antlr.Visitor;
-import org.python.antlr.ast.Assign;
-import org.python.antlr.ast.Name;
-import org.python.antlr.base.expr;
-import org.python.core.PyObject;
+import com.visitors.ASTBaseVisitor;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Name;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-public class CollectChangedNames extends Visitor {
-    private Set<PythonTree> changedNames;
+public class CollectChangedNames extends ASTBaseVisitor {
+    private Set<ASTNode> changedNames;
 
-    public CollectChangedNames(Set<PythonTree> changedNames) {
+    public CollectChangedNames(Set<ASTNode> changedNames) {
         this.changedNames =  changedNames;
     }
 
-    Map<PythonTree,List<PythonTree>> matchedOtherNodes=new HashMap<>();
+    Map<ASTNode, List<ASTNode>> matchedOtherNodes=new HashMap<>();
+
     @Override
-    public Object visitName(Name node)  throws Exception {
-        for (PythonTree name : changedNames) {
+    public boolean visit(Name node) { //TODO: what to catch here? Identifier??
+        for (ASTNode name : changedNames) {
             if (name.toString().equals(node.toString())){
                 if (matchedOtherNodes.get(name)==null)
-                    matchedOtherNodes.put(name,new ArrayList<PythonTree>(Arrays.asList(node)));
+                    matchedOtherNodes.put(name, new ArrayList<>(Arrays.asList(node)));
                 else
                     matchedOtherNodes.get(name).add(node);
             }
         }
-        return super.visitName(node);
+        return super.visit(node);
     }
 
-    public Map<PythonTree, List<PythonTree>> getMatchedOtherNodes() {
+    public Map<ASTNode, List<ASTNode>> getMatchedOtherNodes() {
         return matchedOtherNodes;
     }
 
     @Override
-    public void preVisit(PyObject node) {
+    public void preVisit(ASTNode node) {
 
     }
 
     @Override
-    public void postVisit(PyObject node) {
+    public void postVisit(ASTNode node) {
 
     }
 }

@@ -1,7 +1,8 @@
 package com.adaptrule;
 
+import com.utils.JavaASTUtil;
+import com.visitors.ASTBaseVisitor;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Statement;
 
 public class Util {
@@ -9,14 +10,13 @@ public class Util {
         CheckChildNode childChecker = new CheckChildNode(childNode);
         try {
             childChecker.visit(parentNode);
-            //TODO: how to call this??? - new approach for the same result? (maybe we don't need the visitor)
         } catch (Exception e) {
             e.printStackTrace();
         }
         return childChecker.isChild();
     }
 
-    static class CheckChildNode extends ASTVisitor{
+    static class CheckChildNode extends ASTBaseVisitor {
         private boolean isChild = false;
         private ASTNode childTree;
         public CheckChildNode(ASTNode childTree) {
@@ -25,7 +25,7 @@ public class Util {
 
         @Override
         public void preVisit(ASTNode node) {
-            if (node.getChildren()!=null && node.getChildren().contains(childTree))
+            if (JavaASTUtil.getChildren(node).contains(childTree))
                 isChild=true;
             super.preVisit(node);
         }

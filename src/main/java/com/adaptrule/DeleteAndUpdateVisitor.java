@@ -1,8 +1,8 @@
 package com.adaptrule;
 
+import com.visitors.ASTBaseVisitor;
 import org.eclipse.jdt.core.dom.*;
 import org.python.antlr.PythonTree;
-import org.python.antlr.Visitor;
 import org.python.antlr.ast.Module;
 import org.python.antlr.ast.*;
 import org.python.antlr.base.stmt;
@@ -10,11 +10,11 @@ import org.python.antlr.base.stmt;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public class DeleteAndUpdateVisitor extends ASTVisitor {
+public class DeleteAndUpdateVisitor extends ASTBaseVisitor {
     java.util.List<ASTNode> del;
     ASTNode finalDel;
-    Module rhs;
-    public DeleteAndUpdateVisitor(java.util.List<ASTNode> deletes, ASTNode finalDeletedNode, Module rhs) {
+    CompilationUnit rhs;
+    public DeleteAndUpdateVisitor(java.util.List<ASTNode> deletes, ASTNode finalDeletedNode, CompilationUnit rhs) {
         this.del=deletes;
         this.finalDel=finalDeletedNode;
         this.rhs=rhs;
