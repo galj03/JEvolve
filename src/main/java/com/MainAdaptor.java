@@ -16,10 +16,8 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.python.antlr.ast.Module;
 import org.python.antlr.ast.*;
 import org.python.antlr.base.stmt;
-import org.python.core.PyObject;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -34,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @picocli.CommandLine.Command(
         name = "jevolve",
         mixinStandardHelpOptions = true,  // Adds --help and --version
-        description = "Application that modernize code bases"
+        description = "Application that modernizes code bases"
 )
 public class MainAdaptor {
     public static void main(String[] args) {
@@ -89,7 +87,7 @@ public class MainAdaptor {
             Configurations.TYPE_REPOSITORY = typeRepo;
             String[] files = FileIO.readFile(fileToBeTransformed).split("\n");
             System.out.println(Arrays.toString(files));
-            for (File l_ : patterns.stream().filter(t -> t.getName().startsWith("l_")).collect(Collectors.toList())) {
+            for (File l_ : patterns.stream().filter(t -> t.getName().startsWith("l_")).toList()) {
                 System.out.println("File ++++++++"+l_);
                 File r_ = new File(l_.getParentFile()+ "/r_"+ l_.getName().substring(2));
                 for (String refactoringFile : files) {
@@ -103,7 +101,7 @@ public class MainAdaptor {
     // TODO: input data to "l_name" and "r_name"!!!
     public static void inferTransformationRules(String codeChanges,String outPutRepo){
         List<File> codeChangeExamples = FileIO.readAllFiles(LanguageConfigurations.EXTENSION, codeChanges);
-        for (File l_ : codeChangeExamples.stream().filter(t -> t.getName().startsWith("l_")).collect(Collectors.toList())) {
+        for (File l_ : codeChangeExamples.stream().filter(t -> t.getName().startsWith("l_")).toList()) {
             System.out.println("File ++++++++"+l_);
             File r_ = new File(l_.getParentFile()+ "/r_"+ l_.getName().substring(2));
             RewriteRule rw = new RewriteRule(FileIO.readStringFromFile(l_.getAbsolutePath()),
@@ -115,7 +113,7 @@ public class MainAdaptor {
     }
 
     public static List<MatchedNode> getMatchedNodes(String filename, String lpatternname, MethodDeclaration func, List<ImportDeclaration> importStmt, CompilationUnit lpatternModule) {
-        List<MatchedNode> graphs = new ArrayList<>();
+        List<MatchedNode> graphs;
         PDGBuildingContext fcontext = null;
         fcontext = Try.of(() -> new PDGBuildingContext(importStmt, filename)).onFailure(x -> System.err.println()).get();
         PDGGraph fpdg = new PDGGraph(func, fcontext);
@@ -243,7 +241,7 @@ public class MainAdaptor {
                 if (sourceCode.length()<charStopIndex) charStopIndex= sourceCode.length();
                 numberOfTrailingSpacesAndNewLines = sourceCode.substring(charStartIndex,charStopIndex).length() - sourceCode.substring(charStartIndex,charStopIndex).trim().length();
 
-                if (!adaptedFunction.equals("")) {
+                if (!adaptedFunction.isEmpty()) {
                     if (sourceCode.length()<charStartIndex) charStartIndex=sourceCode.length();
                     adaptedFile.append(sourceCode, previousStop, charStartIndex).append(adaptedFunction);
                     previousStop = charStopIndex-numberOfTrailingSpacesAndNewLines;
@@ -263,7 +261,6 @@ public class MainAdaptor {
     }
 
     public static String transplantPatternToFunction(String filename, MethodDeclaration def, List<ImportDeclaration> imports, String LHS, String RHS, String codeInFile) {
-        BasicCombyOperations op = new BasicCombyOperations();
         String code = def.toString(); //TODO: test if this is the actual code
         CompilationUnit lpatternModule = Utils.getCompilationUnitForTemplate(LHS).onFailure(System.err::println).get();
         CompilationUnit rpatternModule = Utils.getCompilationUnitForTemplate(RHS).onFailure(System.err::println).get();
@@ -289,7 +286,7 @@ public class MainAdaptor {
             AdaptRule aRule = new AdaptRule(allMatchedGraphs.get(0), newdef, rpatternModule); //If you pass def instead of newdef, the adapted rule will be generated for whole function
             Rule rule = aRule.getAdaptedRule();
 
-            Try<CombyRewrite> changedCode = op.rewrite(rule.getLHS(), rule.getRHS(), refactorableCode, ".python");
+            Try<CombyRewrite> changedCode = BasicCombyOperations.rewrite(rule.getLHS(), rule.getRHS(), refactorableCode, ".python");
 
 
 //            StringBuilder adaptedFile = new StringBuilder();
@@ -322,7 +319,7 @@ public class MainAdaptor {
 
     }
 
-    private static int getSpaceForIndentation(FunctionDef def, List<stmt> continuousStmts) {
+    private static int getSpaceForIndentation(MethodDeclaration def, List<stmt> continuousStmts) {
         if (continuousStmts.size()>1){
             return continuousStmts.get(1).getCharStartIndex()-continuousStmts.get(0).getCharStopIndex()-1;
         }

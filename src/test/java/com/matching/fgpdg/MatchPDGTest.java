@@ -1,10 +1,10 @@
 package com.matching.fgpdg;
 
-import com.matching.ConcreteJavaParser;
+import com.utils.JavaASTUtil;
 import com.utils.Utils;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.junit.jupiter.api.Test;
-import org.python.antlr.ast.FunctionDef;
-import org.python.antlr.ast.Module;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,9 +14,9 @@ class MatchPDGTest {
 
     @Test
     void getSubGraphs() {
-        Module codeModule = getPythonModule("author/project/test1.py");
-        Module patternModule = getPythonModule("author/project/pattern.py");
-        FunctionDef func = (FunctionDef) codeModule.getInternalBody().get(1);
+        CompilationUnit codeModule = Utils.getCompilationUnit("author/project/test1.py");
+        CompilationUnit patternModule = Utils.getCompilationUnit("author/project/pattern.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(codeModule).get(1);
         PDGBuildingContext fcontext = null;
         try {
             fcontext = new PDGBuildingContext(new ArrayList<>(),"author/project/test1.py");
@@ -34,14 +34,4 @@ class MatchPDGTest {
             e.printStackTrace();
         }
     }
-
-    private Module getPythonModule(String fileName){
-        ConcreteJavaParser parser = new ConcreteJavaParser();
-        return parser.parse(fileName);
-//        FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
-//        PDGBuildingContext context = new PDGBuildingContext(new ArrayList<>(),"");
-//        PDGGraph pdg = new PDGGraph(func,context);
-
-    }
-
 }

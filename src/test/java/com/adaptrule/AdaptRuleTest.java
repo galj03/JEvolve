@@ -23,7 +23,7 @@ class AdaptRuleTest {
         List<MatchedNode> matchedNodes = getMatchedNodes(filename, lpatternname,rpatternname, codeModule, lpatternModule,rpatternModule);
         List<MatchedNode> allMatchedGraphs = matchedNodes.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
 
-        AdaptRule aRule= new AdaptRule(allMatchedGraphs.get(0),Utils.getAllFunctions(codeModule).get(0) ,rpatternModule);
+        AdaptRule aRule= new AdaptRule(allMatchedGraphs.get(0),Utils.getAllMethods(codeModule).get(0) ,rpatternModule);
         Rule rule = aRule.getAdaptedRule();
         assertEquals(
                 "def function1(sentence, callbacks):\n" +
@@ -53,7 +53,7 @@ class AdaptRuleTest {
 
         List<MatchedNode> matchedNodes = getMatchedNodes(filename, lpatternname,rpatternname, codeModule, lpatternModule,rpatternModule);
         List<MatchedNode> allMatchedGraphs = matchedNodes.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
-        AdaptRule aRule= new AdaptRule(allMatchedGraphs.get(0),Utils.getAllFunctions(codeModule).get(0) ,rpatternModule);
+        AdaptRule aRule= new AdaptRule(allMatchedGraphs.get(0),Utils.getAllMethods(codeModule).get(0) ,rpatternModule);
         Rule rule = aRule.getAdaptedRule();
         assertEquals(
                 "def function1(sentence, callbacks):\n" +
@@ -87,7 +87,7 @@ class AdaptRuleTest {
         List<MatchedNode> matchedNodes = getMatchedNodes(filename, lpatternname,rpatternname, codeModule, lpatternModule,rpatternModule);
         List<MatchedNode> allMatchedGraphs = matchedNodes.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
 
-        AdaptRule aRule= new AdaptRule(allMatchedGraphs.get(0),Utils.getAllFunctions(codeModule).get(0) ,rpatternModule);
+        AdaptRule aRule= new AdaptRule(allMatchedGraphs.get(0),Utils.getAllMethods(codeModule).get(0) ,rpatternModule);
         Rule rule = aRule.getAdaptedRule();
         assertEquals(
                 "def test_application_pretrained_weights_loading(self):\n" +
@@ -147,7 +147,7 @@ class AdaptRuleTest {
         List<MatchedNode> matchedNodes = getMatchedNodes(filename, lpatternname,rpatternname, codeModule, lpatternModule,rpatternModule);
         List<MatchedNode> allMatchedGraphs = matchedNodes.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
 
-        AdaptRule aRule= new AdaptRule(allMatchedGraphs.get(0),Utils.getAllFunctions(codeModule).get(0) ,rpatternModule);
+        AdaptRule aRule= new AdaptRule(allMatchedGraphs.get(0),Utils.getAllMethods(codeModule).get(0) ,rpatternModule);
         Rule rule  = aRule.getAdaptedRule();
         assertEquals(
                 "def test_application_pretrained_weights_loading(self):\n" +
@@ -190,7 +190,7 @@ class AdaptRuleTest {
         CompilationUnit rpatternModule = Utils.getCompilationUnitForTemplate(Utils.getPathToResources("author/project/"+rpatternname+".py"));
         List<MatchedNode> matchedNodes = getMatchedNodes(filename, lpatternname,rpatternname, codeModule, lpatternModule,rpatternModule);
         List<MatchedNode> allMatchedGraphs = matchedNodes.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
-        AdaptRule aRule= new AdaptRule(allMatchedGraphs.get(0),Utils.getAllFunctions(codeModule).get(0) ,rpatternModule);
+        AdaptRule aRule= new AdaptRule(allMatchedGraphs.get(0),Utils.getAllMethods(codeModule).get(0) ,rpatternModule);
         Rule rule  = aRule.getAdaptedRule();
         assertEquals(
                 "def test_application_pretrained_weights_loading(self):\n" +
@@ -220,7 +220,7 @@ class AdaptRuleTest {
         CompilationUnit rpatternModule = Utils.getCompilationUnitForTemplate(Utils.getPathToResources("author/project/"+rpatternname+".py"));
         List<MatchedNode> matchedNodes = getMatchedNodes(filename, lpatternname,rpatternname, codeModule, lpatternModule,rpatternModule);
         List<MatchedNode> allMatchedGraphs = matchedNodes.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
-        AdaptRule aRule= new AdaptRule(allMatchedGraphs.get(0),Utils.getAllFunctions(codeModule).get(0) ,rpatternModule);
+        AdaptRule aRule= new AdaptRule(allMatchedGraphs.get(0),Utils.getAllMethods(codeModule).get(0) ,rpatternModule);
         Rule rule  = aRule.getAdaptedRule();
     }
 
@@ -234,7 +234,7 @@ class AdaptRuleTest {
         CompilationUnit rpatternModule = Utils.getCompilationUnitForTemplate(Utils.getPathToResources("author/project/" + rpatternname + ".py"));
         List<MatchedNode> matchedNodes = getMatchedNodes(filename, lpatternname, rpatternname, codeModule, lpatternModule, rpatternModule);
         List<MatchedNode> allMatchedGraphs = matchedNodes.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList());
-        AdaptRule aRule = new AdaptRule(allMatchedGraphs.get(0), Utils.getAllFunctions(codeModule).get(0), rpatternModule);
+        AdaptRule aRule = new AdaptRule(allMatchedGraphs.get(0), Utils.getAllMethods(codeModule).get(0), rpatternModule);
         Rule rule = aRule.getAdaptedRule();
         System.out.println(rule.getLHS());
         System.out.println(rule.getRHS());

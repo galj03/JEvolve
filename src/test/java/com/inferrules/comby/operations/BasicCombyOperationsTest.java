@@ -6,33 +6,35 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.inferrules.Utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.python.antlr.ast.Module;
 
 class BasicCombyOperationsTest {
 
     @Test
     void rewrite() {
-        BasicCombyOperations op = new BasicCombyOperations();
         CompilationUnit code = Utils.getCompilationUnit("author/project/test22.py");
-        String strCode = code.getInternalBody().get(1).toString();
-        String matcher = "def function1(sentence, intArray):\n" +
-                "    :[l1]\n" +
-                "    :[[l6]] = :[[l8]]\n" +
-                "    :[l3]\n" +
-                "    for :[[l4]] in :[[l5]]:\n" +
-                "        :[[l6]] = :[[l6]] + :[[l4]]\n" +
-                "return :[[l7]]";
-        String rewrite = "def function1(sentence, intArray):\n" +
-                "    :[l1]\n" +
-                "    :[[l6]] = np.sum(:[[l5]])\n" +
-                "    :[l3]\n" +
-                "return :[[l7]]";
+        String strCode = com.utils.Utils.getAllMethods(code).getFirst().toString(); //TODO: test if toString really works
+        String matcher = """
+                def function1(sentence, intArray):
+                    :[l1]
+                    :[[l6]] = :[[l8]]
+                    :[l3]
+                    for :[[l4]] in :[[l5]]:
+                        :[[l6]] = :[[l6]] + :[[l4]]
+                return :[[l7]]""";
+        String rewrite = """
+                def function1(sentence, intArray):
+                    :[l1]
+                    :[[l6]] = np.sum(:[[l5]])
+                    :[l3]
+                return :[[l7]]""";
 
-        Try<CombyRewrite> changedCode = op.rewrite(matcher, rewrite, strCode, ".python");
-        Assertions.assertEquals("def function1(sentence, intArray):\n" +
-                "    hhh = 0\n" +
-                "    number = np.sum(intArray)\n" +
-                "    print(ff)\n" +
-                "return hhh\n",changedCode.get().getRewrittenSource());
+        Try<CombyRewrite> changedCode = BasicCombyOperations.rewrite(matcher, rewrite, strCode, ".python");
+        Assertions.assertEquals("""
+                def function1(sentence, intArray):
+                    hhh = 0
+                    number = np.sum(intArray)
+                    print(ff)
+                return hhh
+                """,changedCode.get().getRewrittenSource());
     }
 }

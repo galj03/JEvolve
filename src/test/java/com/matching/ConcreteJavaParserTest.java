@@ -1,8 +1,9 @@
 package com.matching;
 
 
+import com.utils.JavaASTUtil;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.junit.jupiter.api.Test;
-import org.python.antlr.ast.Module;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -10,14 +11,15 @@ import java.io.InputStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ConcreatePythonParserTest {
+//TODO: adapt files!
+class ConcreteJavaParserTest {
     @Test
     void parse() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test1.py");
-        System.out.println(parse.toStringTree());
+        CompilationUnit parse = parser.parse("author/project/test1.py");
+        System.out.println(parse.toString());
 
-        assertEquals(3,parse.getChildCount());
+        assertEquals(3, JavaASTUtil.getChildren(parse).size());
     }
 
     @Test
@@ -25,7 +27,7 @@ class ConcreatePythonParserTest {
         String code = "import numpy as np \nx=True";
         InputStream codeStream = new ByteArrayInputStream(code.getBytes());
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse(codeStream);
-        assertEquals(2,parse.getChildCount());
+        CompilationUnit parse = parser.parse(codeStream);
+        assertEquals(2, JavaASTUtil.getChildren(parse).size());
     }
 }

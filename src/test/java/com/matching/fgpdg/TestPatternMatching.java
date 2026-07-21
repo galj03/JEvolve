@@ -6,11 +6,12 @@ import com.matching.fgpdg.nodes.TypeInfo.TypeWrapper;
 import com.utils.DotGraph;
 import com.utils.FileIO;
 import com.utils.GitUtils;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.inferrules.Utils;
 import org.junit.jupiter.api.Test;
 import org.python.antlr.ast.*;
-import org.python.antlr.ast.Module;
-import org.python.antlr.base.stmt;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +19,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.inferrules.Utils.getAllFunctions;
+import static org.inferrules.Utils.getAllMethods;
 
 public class TestPatternMatching {
     @Test
@@ -34,27 +35,26 @@ public class TestPatternMatching {
         }
     }
 
-    private Module getPythonModuleForTemplate(String fileName) throws Exception {
+    private CompilationUnit getPythonModuleForTemplate(String fileName) throws Exception {
         ConcreteJavaParser parser = new ConcreteJavaParser();
         return parser.parseTemplates(FileIO.readStringFromFile(fileName));
     }
 
     private void analyseProject(String projectPath) throws Exception {
         for (File pattern : getAllPatternFiles(getPathToResources("author/project/GroupOfPatterns/"))) {
-            Module patternModule = getPythonModuleForTemplate(pattern.getAbsolutePath());
-            processProjectForPattern(projectPath,pattern.getPath() ,patternModule);
+            CompilationUnit patternModule = getPythonModuleForTemplate(pattern.getAbsolutePath());
+            processProjectForPattern(projectPath,pattern.getPath(), patternModule);
         }
     }
 
-    private void processProjectForPattern(String projectPath, String patternPath,Module patternModule) throws IOException {
+    private void processProjectForPattern(String projectPath, String patternPath, CompilationUnit patternModule) throws IOException {
         File dir = new File(projectPath);
         if (dir.listFiles()==null)
             return;
         ArrayList<File> files = Utils.getJavaFiles(Objects.requireNonNull(dir.listFiles()));
         Guards guards = new Guards(com.utils.Utils.getFileContent(getPathToResources(patternPath)),patternModule);
         TypeWrapper wrapper = new TypeWrapper(guards);
-        PDGBuildingContext patternContext = new PDGBuildingContext(patternModule.getInternalBody().stream().filter(x -> x instanceof Import
-                || x instanceof ImportFrom).collect(Collectors.toList()),wrapper);
+        PDGBuildingContext patternContext = new PDGBuildingContext((List<ImportDeclaration>)patternModule.imports(), wrapper);
         PDGGraph ppdg = new PDGGraph(patternModule,patternContext);
 
         DotGraph pdg1 = new DotGraph(ppdg);
@@ -71,15 +71,14 @@ public class TestPatternMatching {
             }
             String gitHubFilePath = gitHubProjectName+new File(Configurations.PROJECT_REPOSITORY+"/"+projectName).toURI().
                     relativize(new File(file.toURI()).toURI()).getPath();
-            Module parse = getPythonModule (file.getAbsolutePath());
+            CompilationUnit parse = Utils.getCompilationUnit(file.getAbsolutePath());
             if (parse!=null){
-                List<stmt> codeImports = parse.getInternalBody().stream().filter(x -> x instanceof Import
-                        || x instanceof ImportFrom).collect(Collectors.toList());
-                ArrayList<FunctionDef> functions = getAllFunctions(parse);
+                List<ImportDeclaration> codeImports = (List<ImportDeclaration>)parse.imports();
+                ArrayList<MethodDeclaration> functions = getAllMethods(parse);
 //            if (file.getAbsolutePath().equals("/Users/malinda/Documents/Research3/PROJECT_REPO/keras-team/keras/keras/datasets/mnist.py")) {
                 int num = 0;
                 if (functions.size()>0) {
-                    for (FunctionDef function : functions) {
+                    for (MethodDeclaration function : functions) {
                         System.out.println("Function: " + function.getInternalName());
                         try {
                             String gitHubLocation= gitHubFilePath+"#L"+function.getLineno();
@@ -97,8 +96,8 @@ public class TestPatternMatching {
                                 graphs.forEach(x -> x.updateAllMatchedNodes(x, ppdg));
                                 if (graphs.stream().anyMatch(MatchedNode::isAllChildsMatched)) {
                                     String paterntName = "";
-                                    if (function.getParent() != null && function.getParent() instanceof FunctionDef)
-                                        paterntName = ((FunctionDef) function.getParent()).getInternalName();
+                                    if (function.getParent() != null && function.getParent() instanceof MethodDeclaration)
+                                        paterntName = ((MethodDeclaration) function.getParent()).getInternalName();
                                     else if (function.getParent() != null && function.getParent() instanceof ClassDef)
                                         paterntName = ((ClassDef) function.getParent()).getInternalName();
                                     String fileName = paterntName + "____" + function.getInternalName();
@@ -133,11 +132,6 @@ public class TestPatternMatching {
         if (dir.listFiles()==null)
             return new ArrayList<> ();
         return Utils.getJavaFiles(Objects.requireNonNull(dir.listFiles()));
-    }
-
-    private Module getPythonModule(String fileName){
-        ConcreteJavaParser parser = new ConcreteJavaParser();
-        return parser.parse(fileName);
     }
 
     private String getPathToResources(String name){

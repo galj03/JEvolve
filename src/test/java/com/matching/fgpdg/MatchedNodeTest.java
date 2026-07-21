@@ -2,12 +2,13 @@ package com.matching.fgpdg;
 
 import com.matching.fgpdg.nodes.*;
 import com.utils.DotGraph;
+import com.utils.JavaASTUtil;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.python.antlr.Visitor;
-import org.python.antlr.ast.*;
-import org.python.antlr.ast.Module;
-import org.python.antlr.base.stmt;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,9 +27,9 @@ class MatchedNodeTest {
         String patternname = "pattern1";
         List<MatchedNode> graphs =null;
         graphs = getMatchedNodes(filename, patternname, graphs);
-        graphs.get(0).isAllMatchedGraph();
-        Assertions.assertTrue(graphs.get(0).isAllMatchedGraph());
-        Assertions.assertEquals(7,graphs.get(0).getCodePDGNodes().size());
+        graphs.getFirst().isAllMatchedGraph();
+        Assertions.assertTrue(graphs.getFirst().isAllMatchedGraph());
+        Assertions.assertEquals(7, graphs.getFirst().getCodePDGNodes().size());
     }
 
     @Test
@@ -37,7 +38,7 @@ class MatchedNodeTest {
         String patternname = "pattern1";
         List<MatchedNode> graphs =null;
         graphs = getMatchedNodes(filename, patternname, graphs);
-        Assertions.assertEquals(1,graphs.stream().filter(MatchedNode::isAllChildsMatched).count());
+        Assertions.assertEquals(1, graphs.stream().filter(MatchedNode::isAllChildsMatched).count());
     }
 
 //    @Test
@@ -54,10 +55,10 @@ class MatchedNodeTest {
     void testSubGraphs4()  throws Exception{
         String filename="test1";
         String patternname = "pattern";
-        List<MatchedNode> graphs =null;
+        List<MatchedNode> graphs = null;
         graphs = getMatchedNodes(filename, patternname, graphs);
-        Assertions.assertTrue(graphs.get(0).isAllMatchedGraph());
-        Assertions.assertEquals(17,graphs.get(0).getCodePDGNodes().size());
+        Assertions.assertTrue(graphs.getFirst().isAllMatchedGraph());
+        Assertions.assertEquals(17, graphs.getFirst().getCodePDGNodes().size());
     }
 
 //
@@ -111,7 +112,7 @@ class MatchedNodeTest {
         String patternname = "pattern";
         List<MatchedNode> graphs =null;
         graphs = getMatchedNodes(filename, patternname, graphs);
-        Assertions.assertEquals(2,graphs.stream().filter(MatchedNode::isAllChildsMatched).count());
+        Assertions.assertEquals(2, graphs.stream().filter(MatchedNode::isAllChildsMatched).count());
     }
 
     @Test
@@ -120,14 +121,14 @@ class MatchedNodeTest {
         String patternname = "pattern";
         List<MatchedNode> graphs =null;
         graphs = getMatchedNodes(filename, patternname, graphs);
-        Assertions.assertTrue(graphs.get(0).isAllMatchedGraph());
+        Assertions.assertTrue(graphs.getFirst().isAllMatchedGraph());
         for (MatchedNode graph : graphs) {
             if (graph.getAllMatchedNodes().size()==1)
                 Assertions.assertFalse(graph.isAllMatchedGraph());
             else
                 Assertions.assertTrue(graph.isAllMatchedGraph());
         }
-        Assertions.assertEquals(17,graphs.get(0).getCodePDGNodes().size());
+        Assertions.assertEquals(17,graphs.getFirst().getCodePDGNodes().size());
     }
 
     @Test
@@ -152,8 +153,8 @@ class MatchedNodeTest {
         String patternname = "pattern3";
         List<MatchedNode> graphs =null;
         graphs = getMatchedNodes(filename, patternname, graphs);
-        Assertions.assertTrue(graphs.get(0) .isAllMatchedGraph());
-        Assertions.assertEquals(5,graphs.get(0).getCodePDGNodes().size());
+        Assertions.assertTrue(graphs.getFirst().isAllMatchedGraph());
+        Assertions.assertEquals(5,graphs.getFirst().getCodePDGNodes().size());
     }
 
     @Test
@@ -173,7 +174,7 @@ class MatchedNodeTest {
         List<MatchedNode> graphs =null;
         graphs = getMatchedNodes(filename, patternname, graphs);
         Assertions.assertEquals(1,graphs.stream().filter(MatchedNode::isAllChildsMatched).count());
-        Assertions.assertEquals(9,graphs.stream().filter(MatchedNode::isAllChildsMatched).collect(Collectors.toList()).get(0).getCodePDGNodes().size());
+        Assertions.assertEquals(9,graphs.stream().filter(MatchedNode::isAllChildsMatched).toList().getFirst().getCodePDGNodes().size());
     }
 
     @Test
@@ -184,8 +185,8 @@ class MatchedNodeTest {
         graphs = getMatchedNodes(filename, patternname, graphs);
         Assertions.assertEquals(1,graphs.stream().filter(MatchedNode::isAllChildsMatched).count());
 //        int nodes = Math.max(graphs.get(0).getCodePDGNodes().size(), graphs.get(1).getCodePDGNodes().size());
-        Assertions.assertTrue(graphs.get(0) .isAllMatchedGraph());
-        Assertions.assertEquals(7,graphs.get(0).getCodePDGNodes().size());
+        Assertions.assertTrue(graphs.getFirst() .isAllMatchedGraph());
+        Assertions.assertEquals(7,graphs.getFirst().getCodePDGNodes().size());
     }
 
     @Test
@@ -453,11 +454,10 @@ class MatchedNodeTest {
 
     @Test
     void testGetPatternGraphForMatching1() {
-        Module codeModule = getCompilationUnit("author/project/pattern2.py");
+        CompilationUnit codeModule = getCompilationUnit("author/project/pattern2.py");
         PDGBuildingContext mcontext = null;
         try {
-            mcontext = new PDGBuildingContext(codeModule.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()),"author/project/pattern2.py");
+            mcontext = new PDGBuildingContext((List<ImportDeclaration>)codeModule.imports(),"author/project/pattern2.py");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -466,13 +466,13 @@ class MatchedNodeTest {
         MatchPDG pdg = new MatchPDG();
         mpdg=pdg.pruneAndCleanPatternPDG(mpdg);
 
-        PDGNode startNode= mpdg.getNodes().stream().filter(x->x instanceof PDGActionNode && x.getOutEdges().size()==1).collect(Collectors.toList()).get(0);
+        PDGNode startNode= mpdg.getNodes().stream().filter(x->x instanceof PDGActionNode && x.getOutEdges().size()==1).toList().getFirst();
         List<PDGNode> visitedNotes = startNode.getInEdges().stream().map(PDGEdge::getSource).filter(y->!(y instanceof PDGActionNode)).collect(Collectors.toList());
-        visitedNotes.addAll(startNode.getOutEdges().stream().map(PDGEdge::getTarget).filter(y->!(y instanceof PDGActionNode)).collect(Collectors.toList()));
+        visitedNotes.addAll(startNode.getOutEdges().stream().map(PDGEdge::getTarget).filter(y->!(y instanceof PDGActionNode)).toList());
         visitedNotes.add(startNode);
         MatchedNode mNode = new MatchedNode();
         PDGGraph flowMatching = mNode.getSubGraphForDifferentDataFlowMatching(mpdg.getNodes().stream().filter(x->x instanceof PDGActionNode &&
-                x.getOutEdges().size()==0).collect(Collectors.toList()).get(0), visitedNotes,mcontext);
+                x.getOutEdges().isEmpty()).toList().getFirst(), visitedNotes,mcontext);
 
         Assertions.assertEquals(3,flowMatching.getNodes().size());
         DotGraph dg = new DotGraph(flowMatching);
@@ -483,11 +483,10 @@ class MatchedNodeTest {
 
     @Test
     void testGetPatternGraphForMatching2() {
-        Module codeModule = getCompilationUnit("author/project/pattern5.py");
+        CompilationUnit codeModule = getCompilationUnit("author/project/pattern5.py");
         PDGBuildingContext mcontext = null;
         try {
-            mcontext = new PDGBuildingContext(codeModule.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()),"author/project/pattern5.py");
+            mcontext = new PDGBuildingContext((List<ImportDeclaration>)codeModule.imports(), "author/project/pattern5.py");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -499,13 +498,13 @@ class MatchedNodeTest {
         String dirPath = "./OUTPUT/";
         dg.toDotFile(new File(dirPath  +"__before_removed__file___"+".dot"));
 
-        PDGNode startNode= mpdg.getNodes().stream().filter(x->x instanceof PDGActionNode && x.getOutEdges().size()==0).collect(Collectors.toList()).get(0);
+        PDGNode startNode= mpdg.getNodes().stream().filter(x->x instanceof PDGActionNode && x.getOutEdges().isEmpty()).toList().getFirst();
         List<PDGNode> visitedNotes = startNode.getInEdges().stream().map(PDGEdge::getSource).filter(y->!(y instanceof PDGActionNode)).collect(Collectors.toList());
-        visitedNotes.addAll(startNode.getOutEdges().stream().map(PDGEdge::getTarget).filter(y->!(y instanceof PDGActionNode)).collect(Collectors.toList()));
+        visitedNotes.addAll(startNode.getOutEdges().stream().map(PDGEdge::getTarget).filter(y->!(y instanceof PDGActionNode)).toList());
         visitedNotes.add(startNode);
         MatchedNode mNode = new MatchedNode();
         PDGGraph flowMatching = mNode.getSubGraphForDifferentDataFlowMatching(mpdg.getNodes().stream().filter(x->x instanceof PDGActionNode &&
-                x.getInEdges().size()==3 && x.getOutEdges().size()==1).collect(Collectors.toList()).get(0), visitedNotes,mcontext);
+                x.getInEdges().size()==3 && x.getOutEdges().size()==1).toList().getFirst(), visitedNotes,mcontext);
 
         DotGraph dg1 = new DotGraph(flowMatching);
         dg1.toDotFile(new File(dirPath  +"__removed__file___"+".dot"));
@@ -576,17 +575,16 @@ class MatchedNodeTest {
 
     @Test
     void canWalkFromNodeToNode() {
-        Module codeModule = getCompilationUnit("author/project/testm9.py");
-        FunctionDef func=null;
-        for (org.python.antlr.base.stmt stmt : codeModule.getInternalBody()) {
-            if (stmt instanceof FunctionDef){
-                func= (FunctionDef) stmt;
+        CompilationUnit codeModule = getCompilationUnit("author/project/testm9.py");
+        MethodDeclaration func=null;
+        for (ASTNode stmt : JavaASTUtil.getChildren(codeModule)) {
+            if (stmt instanceof MethodDeclaration){
+                func = (MethodDeclaration)stmt;
             }
         }
         PDGBuildingContext mcontext = null;
         try {
-            mcontext = new PDGBuildingContext(codeModule.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()),"author/project/testm9.py");
+            mcontext = new PDGBuildingContext((List<ImportDeclaration>)codeModule.imports(), "author/project/testm9.py");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -613,25 +611,23 @@ class MatchedNodeTest {
         }
         MatchedNode matchNode = new MatchedNode();
         Assertions.assertTrue(matchNode.canWalkFromNodeToNode(startNode, endNode, MatchedNode.DIRECTION.TO, new HashSet<>()));
-        Assertions.assertEquals(false,matchNode.canWalkFromNodeToNode(startNode, endNode, MatchedNode.DIRECTION.FROM, new HashSet<>()));
+        Assertions.assertFalse(matchNode.canWalkFromNodeToNode(startNode, endNode, MatchedNode.DIRECTION.FROM, new HashSet<>()));
         Assertions.assertTrue(matchNode.canWalkFromNodeToNode(endNode,startNode,  MatchedNode.DIRECTION.FROM, new HashSet<>()));
-        Assertions.assertEquals(false,matchNode.canWalkFromNodeToNode(endNode,startNode,  MatchedNode.DIRECTION.TO, new HashSet<>()));
+        Assertions.assertFalse(matchNode.canWalkFromNodeToNode(endNode, startNode, MatchedNode.DIRECTION.TO, new HashSet<>()));
     }
 
-    class PyASTVisitor extends Visitor {
-        private int classDef= 0;
-        private int funcDef= 0;
-        @Override
-        public Object visitClassDef(ClassDef node) throws Exception {
-            classDef+=1;
-            return super.visitClassDef(node);
-        }
-        @Override
-        public Object visitFunctionDef(FunctionDef node) throws Exception {
-            classDef+=1;
-            return super.visitFunctionDef(node);
-        }
-    }
-
-
+//    class PyASTVisitor extends ASTBaseVisitor {
+//        private int classDef= 0;
+//        private int funcDef= 0;
+//        @Override
+//        public boolean visit(ClassDef node) {
+//            classDef+=1;
+//            return super.visit(node);
+//        }
+//        @Override
+//        public boolean visit(MethodDeclaration node) {
+//            funcDef+=1;
+//            return super.visit(node);
+//        }
+//    }
 }

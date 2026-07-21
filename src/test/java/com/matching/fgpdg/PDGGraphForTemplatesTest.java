@@ -4,6 +4,8 @@ import com.matching.ConcreteJavaParser;
 import com.matching.fgpdg.nodes.Guards;
 import com.matching.fgpdg.nodes.TypeInfo.TypeWrapper;
 import com.utils.DotGraph;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.python.antlr.ast.FunctionDef;
@@ -12,10 +14,10 @@ import org.python.antlr.ast.ImportFrom;
 import org.python.antlr.ast.Module;
 
 import java.io.File;
-import java.util.stream.Collectors;
+import java.util.List;
 
-public class PDGGraphTestForTemplates {
-    public PDGGraphTestForTemplates() throws Exception {
+public class PDGGraphForTemplatesTest {
+    public PDGGraphForTemplatesTest() throws Exception {
     }
     @Test
     void testPDG2() throws Exception {
@@ -26,16 +28,15 @@ public class PDGGraphTestForTemplates {
                 ":[[l1]] = 0\n" +
                 "for :[[l2]] in :[[l3]]:\n"+
                 "   :[[l1]]=:[[l1]]+:[[l2]]";
-        Module parse = parser.parseTemplates(code);
+        CompilationUnit parse = parser.parseTemplates(code);
         Guards guard = new Guards(code,parse);
         TypeWrapper wrapper = new TypeWrapper(guard);
-        PDGBuildingContext context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x -> x instanceof Import
-                || x instanceof ImportFrom).collect(Collectors.toList()),wrapper);
+        PDGBuildingContext context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), wrapper);
         PDGGraph pdg = new PDGGraph(parse,context);
         DotGraph dg = new DotGraph(pdg);
         String dirPath = "./OUTPUT/";
         dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-        Assertions.assertEquals(pdg.getNodes().size(),13);
+        Assertions.assertEquals(13, pdg.getNodes().size());
         System.out.println(pdg);
     }
 
@@ -53,16 +54,15 @@ public class PDGGraphTestForTemplates {
                     :[[l11]].append.symeig(eigenvectors=True)[:, :[l9]].unsqueeze(-:[[l42]]))
                     :[[l44]] = :[[l11]].matmul(:[[l11]]().t)
                 :[[l56]].:[[l58]](:[[l44]] + :[[l1]]).:[[l62]]""";
-        Module parse = parser.parseTemplates(code);
+        CompilationUnit parse = parser.parseTemplates(code);
         Guards guard = new Guards(code,parse);
         TypeWrapper wrapper = new TypeWrapper(guard);
-        PDGBuildingContext context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x -> x instanceof Import
-                || x instanceof ImportFrom).collect(Collectors.toList()),wrapper);
+        PDGBuildingContext context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), wrapper);
         PDGGraph pdg = new PDGGraph(parse,context);
         DotGraph dg = new DotGraph(pdg);
         String dirPath = "./OUTPUT/";
         dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-        Assertions.assertEquals(pdg.getNodes().size(),47);
+        Assertions.assertEquals(47, pdg.getNodes().size());
     }
 
     @Test
@@ -71,52 +71,51 @@ public class PDGGraphTestForTemplates {
         String code = """
                 with :[l3] as :[[l1]]:
                     :[[l13]] = :[[l16]].:[[l18]](:[[l1]], :[l21])""";
-        Module parse = parser.parseTemplates(code);
+        CompilationUnit parse = parser.parseTemplates(code);
         Guards guard = new Guards(code,parse);
         TypeWrapper wrapper = new TypeWrapper(guard);
-        PDGBuildingContext context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x -> x instanceof Import
-                || x instanceof ImportFrom).collect(Collectors.toList()),wrapper);
+        PDGBuildingContext context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), wrapper);
         PDGGraph pdg = new PDGGraph(parse,context);
         DotGraph dg = new DotGraph(pdg);
         String dirPath = "./OUTPUT/";
         dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-        Assertions.assertEquals(pdg.getNodes().size(),12);
+        Assertions.assertEquals(12, pdg.getNodes().size());
     }
 
     @Test
     void testPDG5() throws Exception {
         ConcreteJavaParser parser = new ConcreteJavaParser();
         String code = """
-                # type :[[l1]] : int[]\n 
+                # type :[[l1]] : int[]
+                
                 mean = sum(:[[l1]])/len(:[[l1]])""";
-        Module parse = parser.parseTemplates(code);
+        CompilationUnit parse = parser.parseTemplates(code);
         Guards guard = new Guards(code,parse);
         TypeWrapper wrapper = new TypeWrapper(guard);
-        PDGBuildingContext context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x -> x instanceof Import
-                || x instanceof ImportFrom).collect(Collectors.toList()),wrapper);
+        PDGBuildingContext context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), wrapper);
         PDGGraph pdg = new PDGGraph(parse,context);
         DotGraph dg = new DotGraph(pdg);
         String dirPath = "./OUTPUT/";
         dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-        Assertions.assertEquals(pdg.getNodes().size(),8);
+        Assertions.assertEquals(8, pdg.getNodes().size());
     }
 
     @Test
     void testPDG6() throws Exception {
         ConcreteJavaParser parser = new ConcreteJavaParser();
         String code = """ 
-                # import :[[l1]] : numpy\n
+                # import :[[l1]] : numpy
+                
                 :[[l1]].dot(:[[l1]].dot(:[[l2]], :[[l3]]), :[[l4]]))""";
-        Module parse = parser.parseTemplates(code);
+        CompilationUnit parse = parser.parseTemplates(code);
         Guards guard = new Guards(code,parse);
         TypeWrapper wrapper = new TypeWrapper(guard);
-        PDGBuildingContext context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x -> x instanceof Import
-                || x instanceof ImportFrom).collect(Collectors.toList()),wrapper);
+        PDGBuildingContext context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), wrapper);
         PDGGraph pdg = new PDGGraph(parse,context);
         DotGraph dg = new DotGraph(pdg);
         String dirPath = "./OUTPUT/";
         dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-        Assertions.assertEquals(pdg.getNodes().size(),7);
+        Assertions.assertEquals(7, pdg.getNodes().size());
     }
 
 
@@ -131,20 +130,14 @@ public class PDGGraphTestForTemplates {
                           :[[l1]] = True
                           break
                 """;
-        Module parse = parser.parseTemplates(code);
+        CompilationUnit parse = parser.parseTemplates(code);
         Guards guard = new Guards(code,parse);
         TypeWrapper wrapper = new TypeWrapper(guard);
-        PDGBuildingContext context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x -> x instanceof Import
-                || x instanceof ImportFrom).collect(Collectors.toList()),wrapper);
+        PDGBuildingContext context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), wrapper);
         PDGGraph pdg = new PDGGraph(parse,context);
         DotGraph dg = new DotGraph(pdg);
         String dirPath = "./OUTPUT/";
         dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-        Assertions.assertEquals(pdg.getNodes().size(),18);
+        Assertions.assertEquals(18, pdg.getNodes().size());
     }
-
-
-
-
-
 }

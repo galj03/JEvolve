@@ -501,8 +501,7 @@ public class Utils {
         }
     }
 
-    static class Interval
-    {
+    public static class Interval {
         int start;
         int end;
 

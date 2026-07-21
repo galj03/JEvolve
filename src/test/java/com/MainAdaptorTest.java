@@ -144,8 +144,4 @@ class MainAdaptorTest {
         String s = MainAdaptor.transplantPatternToFile(projectFile, LHS, RHS, false);
         System.out.println();
     }
-
-
-
-
 }

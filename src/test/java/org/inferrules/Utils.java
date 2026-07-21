@@ -9,13 +9,14 @@ import com.matching.fgpdg.*;
 import com.matching.fgpdg.nodes.Guards;
 import com.matching.fgpdg.nodes.TypeInfo.TypeWrapper;
 import com.utils.FileIO;
+import com.utils.JavaASTUtil;
 import com.visitors.ASTBaseVisitor;
 import io.vavr.Tuple;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.python.antlr.Visitor;
 import org.python.antlr.ast.*;
-import org.python.antlr.ast.Module;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,7 +78,7 @@ public class Utils {
         return javaFiles;
     }
 
-    public static ArrayList<MethodDeclaration>  getAllFunctions(CompilationUnit ast){
+    public static ArrayList<MethodDeclaration> getAllMethods(CompilationUnit ast){
         JavaMethodDeclarationVisitor fu = new JavaMethodDeclarationVisitor();
         try {
             fu.visit(ast);
@@ -105,10 +106,10 @@ public class Utils {
     public static List<MatchedNode> getMatchedNodes(String filename, String lpatternname,String rpatternname,
                                     CompilationUnit codeModule, CompilationUnit lpatternModule, CompilationUnit rpatternModule) throws IOException {
         List<MatchedNode> graphs;
-        FunctionDef func=null;
-        for (org.python.antlr.base.stmt stmt : codeModule.getInternalBody()) {
-            if (stmt instanceof FunctionDef){
-                func= (FunctionDef) stmt;
+        MethodDeclaration func=null;
+        for (ASTNode stmt : JavaASTUtil.getChildren(codeModule)) {
+            if (stmt instanceof MethodDeclaration){
+                func = (MethodDeclaration)stmt;
                 break;
             }
             else if (stmt instanceof ClassDef){
@@ -122,14 +123,12 @@ public class Utils {
             }
         }
         PDGBuildingContext fcontext = null;
-        fcontext = new PDGBuildingContext(codeModule.getInternalBody().stream().filter(x-> x instanceof Import
-                || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/"+filename+".py");
+        fcontext = new PDGBuildingContext((List<ImportDeclaration>)codeModule.imports(), "author/project/"+filename+".py");
         PDGGraph fpdg = new PDGGraph(func,fcontext);
 //        fpdg.getNodes().forEach(x-> System.out.println(x.getId()));
         Guards guards = new Guards(com.utils.Utils.getFileContent(getPathToResources("author/project/"+lpatternname+".py")),lpatternModule);
         TypeWrapper wrapper = new TypeWrapper(guards);
-        PDGBuildingContext mcontext = new PDGBuildingContext(lpatternModule.getInternalBody().stream().filter(x -> x instanceof Import
-                || x instanceof ImportFrom).collect(Collectors.toList()),wrapper);
+        PDGBuildingContext mcontext = new PDGBuildingContext((List<ImportDeclaration>)codeModule.imports(), wrapper);
         PDGGraph mpdg = new PDGGraph(lpatternModule,mcontext);
         MatchPDG match = new MatchPDG();
         graphs=match.getSubGraphs(mpdg,fpdg,mcontext,fcontext );

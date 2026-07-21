@@ -2,13 +2,11 @@ package com.matching.fgpdg;
 
 import com.matching.ConcreteJavaParser;
 import com.utils.DotGraph;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.inferrules.Utils;
 import org.junit.jupiter.api.Test;
-import org.python.antlr.Visitor;
-import org.python.antlr.ast.*;
-import org.python.antlr.ast.Module;
-import org.python.antlr.base.stmt;
-import org.python.modules.thread._thread$exit_exposer;
 
 import java.io.File;
 
@@ -16,9 +14,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
-import static org.inferrules.Utils.getAllFunctions;
+import static org.inferrules.Utils.getAllMethods;
 
 public class TestPDGOfProjects {
     @Test
@@ -29,15 +26,14 @@ public class TestPDGOfProjects {
         for (File file : files) {
             System.out.println(file.getAbsolutePath());
             ConcreteJavaParser parser = new ConcreteJavaParser();
-            Module parse = parser.parse(file.getAbsolutePath());
-            List<stmt> collect = parse.getInternalBody().stream().filter(x -> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList());
-            ArrayList<FunctionDef> functions = getAllFunctions(parse);
-            for (FunctionDef function : functions) {
+            CompilationUnit parse = parser.parse(file.getAbsolutePath());
+            List<ImportDeclaration> collect = (List<ImportDeclaration>)parse.imports();
+            ArrayList<MethodDeclaration> functions = getAllMethods(parse);
+            for (MethodDeclaration function : functions) {
                 try {
                     String relative = new File(Configurations.PROJECT_REPOSITORY).toURI().relativize(new File(file.getAbsolutePath()).toURI()).getPath();
                     PDGBuildingContext context =new PDGBuildingContext(collect, relative);
-                    System.out.println(function.getInternalName());
+                    System.out.println(function.getName());
                     PDGGraph pdg = new PDGGraph(function,context);
                     DotGraph dg = new DotGraph(pdg);
                 } catch (IOException e) {
@@ -55,15 +51,14 @@ public class TestPDGOfProjects {
         for (File file : files) {
             System.out.println(file.getAbsolutePath());
             ConcreteJavaParser parser = new ConcreteJavaParser();
-            Module parse = parser.parse(file.getAbsolutePath());
-            List<stmt> collect = parse.getInternalBody().stream().filter(x -> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList());
-            ArrayList<FunctionDef> functions = getAllFunctions(parse);
-            for (FunctionDef function : functions) {
+            CompilationUnit parse = parser.parse(file.getAbsolutePath());
+            List<ImportDeclaration> collect = (List<ImportDeclaration>)parse.imports();
+            ArrayList<MethodDeclaration> functions = getAllMethods(parse);
+            for (MethodDeclaration function : functions) {
                 try {
                     String relative = new File(Configurations.PROJECT_REPOSITORY).toURI().relativize(new File(file.getAbsolutePath()).toURI()).getPath();
                     PDGBuildingContext context =new PDGBuildingContext(collect, relative);
-                    System.out.println(function.getInternalName());
+                    System.out.println(function.getName());
                     PDGGraph pdg = new PDGGraph(function,context);
                     DotGraph dg = new DotGraph(pdg);
                 } catch (IOException e) {
@@ -81,15 +76,14 @@ public class TestPDGOfProjects {
         for (File file : files) {
             System.out.println(file.getAbsolutePath());
             ConcreteJavaParser parser = new ConcreteJavaParser();
-            Module parse = parser.parse(file.getAbsolutePath());
-            List<stmt> collect = parse.getInternalBody().stream().filter(x -> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList());
-            ArrayList<FunctionDef> functions = getAllFunctions(parse);
-            for (FunctionDef function : functions) {
+            CompilationUnit parse = parser.parse(file.getAbsolutePath());
+            List<ImportDeclaration> collect = (List<ImportDeclaration>)parse.imports();
+            ArrayList<MethodDeclaration> functions = getAllMethods(parse);
+            for (MethodDeclaration function : functions) {
                 try {
                     String relative = new File(Configurations.PROJECT_REPOSITORY).toURI().relativize(new File(file.getAbsolutePath()).toURI()).getPath();
                     PDGBuildingContext context =new PDGBuildingContext(collect, relative);
-                    System.out.println(function.getInternalName());
+                    System.out.println(function.getName());
                     PDGGraph pdg = new PDGGraph(function,context);
                     DotGraph dg = new DotGraph(pdg);
                 } catch (IOException e) {
@@ -98,6 +92,4 @@ public class TestPDGOfProjects {
             }
         }
     }
-
-
 }

@@ -1,11 +1,8 @@
 package com.utils;
 
 import com.matching.ConcreteJavaParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.junit.jupiter.api.Test;
-import org.python.antlr.Visitor;
-import org.python.antlr.ast.FunctionDef;
-import org.python.antlr.ast.Module;
-import org.python.core.PyObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -20,10 +17,8 @@ public class TestPreVisitor {
                 "    self.name = name\n" +
                 "    self.age = age";
         InputStream antlrSting =  new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
-        Module parse = parser.parse(antlrSting);
+        CompilationUnit parse = parser.parse(antlrSting);
 
-
+        //TODO: finish this myself??
     }
-
-
 }

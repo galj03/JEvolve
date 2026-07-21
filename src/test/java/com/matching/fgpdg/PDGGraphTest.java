@@ -2,23 +2,23 @@ package com.matching.fgpdg;
 
 import com.matching.ConcreteJavaParser;
 import com.utils.DotGraph;
+import com.utils.JavaASTUtil;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.python.antlr.ast.FunctionDef;
-import org.python.antlr.ast.Import;
-import org.python.antlr.ast.ImportFrom;
-import org.python.antlr.ast.Module;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.stream.Collectors;
+import java.util.List;
 
 class PDGGraphTest {
     @Test
     void testPattern() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/pattern.py");
+        CompilationUnit parse = parser.parse("author/project/pattern.py");
         PDGBuildingContext context = null;
         try {
             context = new PDGBuildingContext(new ArrayList<>(),"author/project/pattern.py");
@@ -37,20 +37,19 @@ class PDGGraphTest {
     @Test
     void testPDG1() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test1.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
+        CompilationUnit parse = parser.parse("author/project/test1.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(1);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test1.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test1.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),48);
-            Assertions.assertEquals (pdg.statementNodes.size() ,19);
-            Assertions.assertEquals (pdg.dataSources.size() ,10);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (48, pdg.getNodes().size());
+            Assertions.assertEquals (19, pdg.statementNodes.size());
+            Assertions.assertEquals (10, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -60,20 +59,19 @@ class PDGGraphTest {
     @Test
     void testPDG2() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test2.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test2.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test2.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test2.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),31);
-            Assertions.assertEquals (pdg.statementNodes.size() ,12);
-            Assertions.assertEquals (pdg.dataSources.size() ,9);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (31, pdg.getNodes().size());
+            Assertions.assertEquals (12, pdg.statementNodes.size());
+            Assertions.assertEquals (9, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -83,20 +81,19 @@ class PDGGraphTest {
     @Test
     void testPDG3() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test3.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test3.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test3.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test3.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),34);
-            Assertions.assertEquals (pdg.statementNodes.size() ,13);
-            Assertions.assertEquals (pdg.dataSources.size() ,10);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (34, pdg.getNodes().size());
+            Assertions.assertEquals (13, pdg.statementNodes.size());
+            Assertions.assertEquals (10, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -106,20 +103,19 @@ class PDGGraphTest {
     @Test
     void testPDG4() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test4.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test4.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test4.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test4.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),44);
-            Assertions.assertEquals (pdg.statementNodes.size() ,18);
-            Assertions.assertEquals (pdg.dataSources.size() ,14);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (44, pdg.getNodes().size());
+            Assertions.assertEquals (18, pdg.statementNodes.size());
+            Assertions.assertEquals (14, pdg.dataSources.size());
             //TODO Tuples do not engage with other elements-FIX IT
         } catch (IOException e) {
             e.printStackTrace();
@@ -129,20 +125,19 @@ class PDGGraphTest {
     @Test
     void testPDG5() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test5.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test5.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test5.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test5.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),18);
-            Assertions.assertEquals (pdg.statementNodes.size() ,7);
-            Assertions.assertEquals (pdg.dataSources.size() ,5);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (18, pdg.getNodes().size());
+            Assertions.assertEquals (7, pdg.statementNodes.size());
+            Assertions.assertEquals (5, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -152,20 +147,19 @@ class PDGGraphTest {
     @Test
     void testPDG6() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test6.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test6.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test6.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test6.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),37);
-            Assertions.assertEquals (pdg.statementNodes.size() ,19);
-            Assertions.assertEquals (pdg.dataSources.size() ,10);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (37, pdg.getNodes().size());
+            Assertions.assertEquals (19, pdg.statementNodes.size());
+            Assertions.assertEquals (10, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -175,20 +169,19 @@ class PDGGraphTest {
     @Test
     void testPDG7() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test7.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test7.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test7.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test7.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),25);
-            Assertions.assertEquals (pdg.statementNodes.size() ,10);
-            Assertions.assertEquals (pdg.dataSources.size() ,6);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (25, pdg.getNodes().size());
+            Assertions.assertEquals (10, pdg.statementNodes.size());
+            Assertions.assertEquals (6, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -198,20 +191,19 @@ class PDGGraphTest {
     @Test
     void testPDG8() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test8.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test8.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test8.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test8.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),26);
-            Assertions.assertEquals (pdg.statementNodes.size() ,10);
-            Assertions.assertEquals (pdg.dataSources.size() ,9);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (26, pdg.getNodes().size());
+            Assertions.assertEquals (10, pdg.statementNodes.size());
+            Assertions.assertEquals (9, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -221,20 +213,19 @@ class PDGGraphTest {
     @Test
     void testPDG9() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test9.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test9.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test9.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test9.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),31);
-            Assertions.assertEquals (pdg.statementNodes.size() ,12);
-            Assertions.assertEquals (pdg.dataSources.size() ,7);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (31, pdg.getNodes().size());
+            Assertions.assertEquals (12, pdg.statementNodes.size());
+            Assertions.assertEquals (7, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -244,20 +235,19 @@ class PDGGraphTest {
     @Test
     void testPDG10() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test10.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test10.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test10.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test10.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),37);
-            Assertions.assertEquals (pdg.statementNodes.size() ,12);
-            Assertions.assertEquals (pdg.dataSources.size() ,10);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (37, pdg.getNodes().size());
+            Assertions.assertEquals (12, pdg.statementNodes.size());
+            Assertions.assertEquals (10, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -267,20 +257,19 @@ class PDGGraphTest {
     @Test
     void testPDG11() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test11.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test11.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test11.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test11.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),47);
-            Assertions.assertEquals (pdg.statementNodes.size() ,17);
-            Assertions.assertEquals (pdg.dataSources.size() ,12);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (47, pdg.getNodes().size());
+            Assertions.assertEquals (17, pdg.statementNodes.size());
+            Assertions.assertEquals (12, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -290,20 +279,19 @@ class PDGGraphTest {
     @Test
     void testPDG12() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test12.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test12.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test12.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test12.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),34);
-            Assertions.assertEquals (pdg.statementNodes.size() ,13);
-            Assertions.assertEquals (pdg.dataSources.size() ,10);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (34, pdg.getNodes().size());
+            Assertions.assertEquals (13, pdg.statementNodes.size());
+            Assertions.assertEquals (10, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -313,20 +301,19 @@ class PDGGraphTest {
     @Test
     void testPDG13() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test13.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test13.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test13.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test13.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),34);
-            Assertions.assertEquals (pdg.statementNodes.size() ,13);
-            Assertions.assertEquals (pdg.dataSources.size() ,10);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (34, pdg.getNodes().size());
+            Assertions.assertEquals (13, pdg.statementNodes.size());
+            Assertions.assertEquals (10, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -336,20 +323,19 @@ class PDGGraphTest {
     @Test
     void testPDG14() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test14.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test14.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test14.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test14.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),34);
-            Assertions.assertEquals (pdg.statementNodes.size() ,13);
-            Assertions.assertEquals (pdg.dataSources.size() ,10);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (34, pdg.getNodes().size());
+            Assertions.assertEquals (13, pdg.statementNodes.size());
+            Assertions.assertEquals (10, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -359,20 +345,19 @@ class PDGGraphTest {
     @Test
     void testPDG15() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test15.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test15.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test15.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test15.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),33);
-            Assertions.assertEquals (pdg.statementNodes.size() ,11);
-            Assertions.assertEquals (pdg.dataSources.size() ,13);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (33, pdg.getNodes().size());
+            Assertions.assertEquals (11, pdg.statementNodes.size());
+            Assertions.assertEquals (13, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -382,20 +367,19 @@ class PDGGraphTest {
     @Test
     void testPDG16() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test16.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test16.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test16.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test16.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),27);
-            Assertions.assertEquals (pdg.statementNodes.size() ,10);
-            Assertions.assertEquals (pdg.dataSources.size() ,6);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (27, pdg.getNodes().size());
+            Assertions.assertEquals (10, pdg.statementNodes.size());
+            Assertions.assertEquals (6, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -405,20 +389,19 @@ class PDGGraphTest {
     @Test
     void testPDG17() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test17.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test17.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test17.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test17.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),29);
-            Assertions.assertEquals (pdg.statementNodes.size() ,10);
-            Assertions.assertEquals (pdg.dataSources.size() ,11);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (29, pdg.getNodes().size());
+            Assertions.assertEquals (10, pdg.statementNodes.size());
+            Assertions.assertEquals (11, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -428,20 +411,19 @@ class PDGGraphTest {
     @Test
     void testPDG18() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test18.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test18.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test18.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test18.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,0);
-            Assertions.assertEquals (pdg.getNodes().size(),16);
-            Assertions.assertEquals (pdg.statementNodes.size() ,10);
-            Assertions.assertEquals (pdg.dataSources.size() ,1);
+            Assertions.assertEquals (0, pdg.parameters.length);
+            Assertions.assertEquals (16, pdg.getNodes().size());
+            Assertions.assertEquals (10, pdg.statementNodes.size());
+            Assertions.assertEquals (1, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -451,20 +433,19 @@ class PDGGraphTest {
     @Test
     void testPDG19() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test19.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test19.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test19.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test19.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,0);
-            Assertions.assertEquals (pdg.getNodes().size(),17);
-            Assertions.assertEquals (pdg.statementNodes.size() ,8);
-            Assertions.assertEquals (pdg.dataSources.size() ,3);
+            Assertions.assertEquals (0, pdg.parameters.length);
+            Assertions.assertEquals (17, pdg.getNodes().size());
+            Assertions.assertEquals (8, pdg.statementNodes.size());
+            Assertions.assertEquals (3, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -474,20 +455,19 @@ class PDGGraphTest {
     @Test
     void testPDG20() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test20.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test20.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test20.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test20.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,0);
-            Assertions.assertEquals (pdg.getNodes().size(),10);
-            Assertions.assertEquals (pdg.statementNodes.size() ,2);
-            Assertions.assertEquals (pdg.dataSources.size() ,5);
+            Assertions.assertEquals (0, pdg.parameters.length);
+            Assertions.assertEquals (10, pdg.getNodes().size());
+            Assertions.assertEquals (2, pdg.statementNodes.size());
+            Assertions.assertEquals (5, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -497,20 +477,19 @@ class PDGGraphTest {
     @Test
     void testPDG21() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test21.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(2);
+        CompilationUnit parse = parser.parse("author/project/test21.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(2);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test21.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test21.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,0);
-            Assertions.assertEquals (pdg.getNodes().size(),9);
-            Assertions.assertEquals (pdg.statementNodes.size() ,3);
-            Assertions.assertEquals (pdg.dataSources.size() ,2);
+            Assertions.assertEquals (0, pdg.parameters.length);
+            Assertions.assertEquals (9, pdg.getNodes().size());
+            Assertions.assertEquals (3, pdg.statementNodes.size());
+            Assertions.assertEquals (2, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -520,20 +499,19 @@ class PDGGraphTest {
     @Test
     void testPDGm2() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/testm2.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
+        CompilationUnit parse = parser.parse("author/project/testm2.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(1);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/testm2.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/testm2.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),52);
-            Assertions.assertEquals (pdg.statementNodes.size() ,21);
-            Assertions.assertEquals (pdg.dataSources.size() ,55);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (52, pdg.getNodes().size());
+            Assertions.assertEquals (21, pdg.statementNodes.size());
+            Assertions.assertEquals (55, pdg.dataSources.size());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -543,20 +521,19 @@ class PDGGraphTest {
     @Test
     void testPDG23() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test22.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
+        CompilationUnit parse = parser.parse("author/project/test22.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(1);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test22.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test22.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),28);
-            Assertions.assertEquals (pdg.statementNodes.size() ,10);
-            Assertions.assertEquals (pdg.dataSources.size() ,6);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (28, pdg.getNodes().size());
+            Assertions.assertEquals (10, pdg.statementNodes.size());
+            Assertions.assertEquals (6, pdg.dataSources.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -565,20 +542,19 @@ class PDGGraphTest {
     @Test
     void testPDG24() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test23.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
+        CompilationUnit parse = parser.parse("author/project/test23.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(1);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test23.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test23.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),28);
-            Assertions.assertEquals (pdg.statementNodes.size() ,10);
-            Assertions.assertEquals (pdg.dataSources.size() ,38);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (28, pdg.getNodes().size());
+            Assertions.assertEquals (10, pdg.statementNodes.size());
+            Assertions.assertEquals (38, pdg.dataSources.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -587,20 +563,19 @@ class PDGGraphTest {
     @Test
     void testPDG25() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test26.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
+        CompilationUnit parse = parser.parse("author/project/test26.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(1);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test26.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test26.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,2);
-            Assertions.assertEquals (pdg.getNodes().size(),35);
-            Assertions.assertEquals (pdg.statementNodes.size() ,11);
-            Assertions.assertEquals (pdg.dataSources.size() ,2);
+            Assertions.assertEquals (2, pdg.parameters.length);
+            Assertions.assertEquals (35, pdg.getNodes().size());
+            Assertions.assertEquals (11, pdg.statementNodes.size());
+            Assertions.assertEquals (2, pdg.dataSources.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -609,20 +584,19 @@ class PDGGraphTest {
     @Test
     void testPDG26() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test27.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
+        CompilationUnit parse = parser.parse("author/project/test27.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(1);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test27.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test27.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,1);
-            Assertions.assertEquals (pdg.getNodes().size(),40);
-            Assertions.assertEquals (pdg.statementNodes.size() ,11);
-            Assertions.assertEquals (pdg.dataSources.size() ,2);
+            Assertions.assertEquals (1, pdg.parameters.length);
+            Assertions.assertEquals (40, pdg.getNodes().size());
+            Assertions.assertEquals (11, pdg.statementNodes.size());
+            Assertions.assertEquals (2, pdg.dataSources.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -631,20 +605,19 @@ class PDGGraphTest {
     @Test
     void testPDG27() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test28.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
+        CompilationUnit parse = parser.parse("author/project/test28.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(1);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test28.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test28.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,1);
-            Assertions.assertEquals (pdg.getNodes().size(),35);
-            Assertions.assertEquals (pdg.statementNodes.size() ,11);
-            Assertions.assertEquals (pdg.dataSources.size() ,2);
+            Assertions.assertEquals (1, pdg.parameters.length);
+            Assertions.assertEquals (35, pdg.getNodes().size());
+            Assertions.assertEquals (11, pdg.statementNodes.size());
+            Assertions.assertEquals (2, pdg.dataSources.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -653,20 +626,19 @@ class PDGGraphTest {
     @Test
     void testPDG28() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test29.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
+        CompilationUnit parse = parser.parse("author/project/test29.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(1);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test29.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test29.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,0);
-            Assertions.assertEquals (pdg.getNodes().size(),24);
-            Assertions.assertEquals (pdg.statementNodes.size() ,8);
-            Assertions.assertEquals (pdg.dataSources.size() ,2);
+            Assertions.assertEquals (0, pdg.parameters.length);
+            Assertions.assertEquals (24, pdg.getNodes().size());
+            Assertions.assertEquals (8, pdg.statementNodes.size());
+            Assertions.assertEquals (2, pdg.dataSources.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -675,20 +647,19 @@ class PDGGraphTest {
     @Test
     void testPDG29() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test30.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
+        CompilationUnit parse = parser.parse("author/project/test30.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(1);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test30.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test30.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,0);
-            Assertions.assertEquals (pdg.getNodes().size(),33);
-            Assertions.assertEquals (pdg.statementNodes.size() ,15);
-            Assertions.assertEquals (pdg.dataSources.size() ,9);
+            Assertions.assertEquals (0, pdg.parameters.length);
+            Assertions.assertEquals (33, pdg.getNodes().size());
+            Assertions.assertEquals(15, pdg.statementNodes.size());
+            Assertions.assertEquals (9, pdg.dataSources.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -697,20 +668,19 @@ class PDGGraphTest {
     @Test
     void testPDG30() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test31.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
+        CompilationUnit parse = parser.parse("author/project/test31.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(1);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test30.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test30.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,0);
-            Assertions.assertEquals (pdg.getNodes().size(),27);
-            Assertions.assertEquals (pdg.statementNodes.size() ,10);
-            Assertions.assertEquals (pdg.dataSources.size() ,10);
+            Assertions.assertEquals (0, pdg.parameters.length);
+            Assertions.assertEquals (27, pdg.getNodes().size());
+            Assertions.assertEquals (10, pdg.statementNodes.size());
+            Assertions.assertEquals (10, pdg.dataSources.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -720,20 +690,19 @@ class PDGGraphTest {
     @Test
     void testPDG31() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test32.py");
-        FunctionDef func = (FunctionDef) parse.getInternalBody().get(1);
+        CompilationUnit parse = parser.parse("author/project/test32.py");
+        MethodDeclaration func = (MethodDeclaration) JavaASTUtil.getChildren(parse).get(1);
         PDGBuildingContext context = null;
         try {
-            context = new PDGBuildingContext(parse.getInternalBody().stream().filter(x-> x instanceof Import
-                    || x instanceof ImportFrom).collect(Collectors.toList()), "author/project/test32.py");
+            context = new PDGBuildingContext((List<ImportDeclaration>)parse.imports(), "author/project/test32.py");
             PDGGraph pdg = new PDGGraph(func,context);
             DotGraph dg = new DotGraph(pdg);
             String dirPath = "./OUTPUT/";
             dg.toDotFile(new File(dirPath  +"file___"+".dot"));
-            Assertions.assertEquals (pdg.parameters.length,0);
-            Assertions.assertEquals (pdg.getNodes().size(),27);
-            Assertions.assertEquals (pdg.statementNodes.size() ,10);
-            Assertions.assertEquals (pdg.dataSources.size() ,10);
+            Assertions.assertEquals (0, pdg.parameters.length);
+            Assertions.assertEquals (27, pdg.getNodes().size());
+            Assertions.assertEquals (10, pdg.statementNodes.size());
+            Assertions.assertEquals (10, pdg.dataSources.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -742,9 +711,7 @@ class PDGGraphTest {
     @Test
     void testParse() {
         ConcreteJavaParser parser = new ConcreteJavaParser();
-        Module parse = parser.parse("author/project/test24.py");
+        CompilationUnit parse = parser.parse("author/project/test24.py");
         System.out.println(parse);
     }
-
-
 }
